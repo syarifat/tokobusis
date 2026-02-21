@@ -12,6 +12,7 @@ use App\Http\Controllers\Admin\EventController as AdminEventController;
 use App\Http\Controllers\Pelanggan\DashboardController as PelangganDashboard;
 use App\Http\Controllers\Pelanggan\KeranjangController;
 use App\Http\Controllers\Pelanggan\EventController as PelangganEventController;
+use App\Http\Controllers\Pelanggan\CheckoutController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -36,6 +37,8 @@ Route::middleware(['auth', 'role:pelanggan'])->prefix('pelanggan')->name('pelang
     Route::delete('/keranjang/hapus/{keranjang}', [KeranjangController::class, 'destroy'])->name('keranjang.destroy');
     Route::get('/event', [PelangganEventController::class, 'index'])->name('event.index');
     Route::post('/event/ajukan', [PelangganEventController::class, 'store'])->name('event.store');
+    Route::get('/checkout', [CheckoutController::class, 'index'])->name('checkout.index');
+    Route::post('/checkout/proses', [CheckoutController::class, 'process'])->name('checkout.process');
 });
 
 Route::middleware('auth')->group(function () {

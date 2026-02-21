@@ -103,9 +103,9 @@
                                     <span class="text-gray-600">Total Keseluruhan:</span>
                                     <span class="text-2xl font-bold text-gray-900 block md:inline md:ml-2">Rp {{ number_format($totalKeseluruhan, 0, ',', '.') }}</span>
                                 </div>
-                                <button class="bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-8 rounded-lg shadow-lg transition duration-200">
+                                <a href="{{ route('pelanggan.checkout.index') }}" class="bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-8 rounded-lg shadow-lg transition duration-200">
                                     Lanjut ke Checkout
-                                </button>
+                                </a>
                             </div>
                         </div>
 

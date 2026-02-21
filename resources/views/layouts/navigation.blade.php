@@ -25,11 +25,17 @@
                         <x-nav-link :href="route('admin.kategori.index')" :active="request()->routeIs('admin.kategori.*')">
                             {{ __('Kategori') }}
                         </x-nav-link>
+                        <x-nav-link :href="route('admin.event.index')" :active="request()->routeIs('admin.event.*')">
+                            {{ __('Pengajuan Event') }}
+                        </x-nav-link>
                     @endif
 
                     @if(Auth::user()->role === 'pelanggan')
                         <x-nav-link :href="route('pelanggan.keranjang.index')" :active="request()->routeIs('pelanggan.keranjang.*')">
                             {{ __('Keranjang Belanja') }}
+                        </x-nav-link>
+                        <x-nav-link :href="route('pelanggan.event.index')" :active="request()->routeIs('pelanggan.event.*')">
+                            {{ __('Pengajuan Event') }}
                         </x-nav-link>
                     @endif
                 </div>
@@ -91,12 +97,18 @@
                 <x-responsive-nav-link :href="route('admin.kategori.index')" :active="request()->routeIs('admin.kategori.*')">
                     {{ __('Kategori') }}
                 </x-responsive-nav-link>
+                <x-responsive-nav-link :href="route('admin.event.index')" :active="request()->routeIs('admin.event.*')">
+                            {{ __('Pengajuan Event') }}
+                        </x-responsive-nav-link>
             @endif
 
             @if(Auth::user()->role === 'pelanggan')
                 <x-responsive-nav-link :href="route('pelanggan.keranjang.index')" :active="request()->routeIs('pelanggan.keranjang.*')">
                     {{ __('Keranjang Belanja') }}
                 </x-responsive-nav-link>
+                <x-responsive-nav-link :href="route('pelanggan.event.index')" :active="request()->routeIs('pelanggan.event.*')">
+                            {{ __('Pengajuan Event') }}
+                        </x-responsive-nav-link>
             @endif
         </div>
 

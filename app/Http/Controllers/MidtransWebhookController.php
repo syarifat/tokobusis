@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Pembayaran;
 use App\Models\Pesanan;
 use Illuminate\Http\Request;
+use App\Services\FonnteService;
 
 class MidtransWebhookController extends Controller
 {
@@ -38,6 +39,15 @@ class MidtransWebhookController extends Controller
                 'total_dibayar' => $newTotalDibayar,
                 'status_pembayaran' => $statusBayar
             ]);
+            // Kirim WA Notifikasi ke Pelanggan
+            $wa = new FonnteService();
+            $pesanUser = "✅ *PEMBAYARAN DITERIMA*\n\n" .
+                        "Halo {$pesanan->user->name}, pembayaran untuk pesanan *{$pesanan->kode_pesanan}* sebesar Rp " . number_format($pembayaran->nominal_bayar, 0, ',', '.') . " telah kami terima.\n\n" .
+                        "Sisa Tagihan: Rp " . number_format($pesanan->total_harga - $pesanan->total_dibayar, 0, ',', '.') . "\n" .
+                        "Status: " . strtoupper($statusBayar) . "\n\n" .
+                        "Terima kasih telah berbelanja di Toko Bu Sis!";
+
+            $wa->sendMessage($pesanan->user->no_hp, $pesanUser);
         }
 
         return response()->json(['message' => 'Success']);

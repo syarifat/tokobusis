@@ -11,6 +11,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 use Carbon\Carbon;
+use App\Services\FonnteService;
 
 class CheckoutController extends Controller
 {
@@ -55,10 +56,8 @@ class CheckoutController extends Controller
             return $item->qty * $item->barang->harga;
         });
 
-        // Buat Kode Pesanan Unik (ORD-YYYYMMDD-RANDOM)
         $kode_pesanan = 'ORD-' . date('Ymd') . '-' . strtoupper(Str::random(5));
 
-        // Persiapkan data pesanan
         $dataPesanan = [
             'user_id'             => Auth::id(),
             'kode_pesanan'        => $kode_pesanan,
@@ -71,26 +70,20 @@ class CheckoutController extends Controller
             'catatan'             => $request->catatan,
         ];
 
-        // Jika user memilih Bon/Event
         if ($request->jenis_pesanan == 'event') {
             $event = PengajuanEvent::findOrFail($request->event_id);
-            
-            // Validasi kepemilikan event
             if ($event->user_id !== Auth::id() || $event->status !== 'disetujui') {
                 abort(403, 'Event tidak valid.');
             }
-
             $dataPesanan['nama_event'] = $event->nama_acara;
             $dataPesanan['tanggal_acara'] = $event->tanggal_acara;
-            
-            // Tenggat pembayaran otomatis diset 7 hari SETELAH tanggal acara
             $dataPesanan['tenggat_pembayaran'] = Carbon::parse($event->tanggal_acara)->addDays(7);
         }
 
-        // 1. Simpan ke tabel pesanans
+        // 1. Simpan ke database
         $pesanan = Pesanan::create($dataPesanan);
 
-        // 2. Pindahkan isi Keranjang ke PesananItem
+        // 2. Pindahkan item & kurangi stok
         foreach ($keranjangs as $item) {
             PesananItem::create([
                 'pesanan_id'   => $pesanan->id,
@@ -99,15 +92,29 @@ class CheckoutController extends Controller
                 'harga_satuan' => $item->barang->harga,
                 'subtotal'     => $item->qty * $item->barang->harga,
             ]);
-
-            // Kurangi stok barang utama
             $item->barang->decrement('stok', $item->qty);
         }
 
         // 3. Kosongkan Keranjang
         Keranjang::where('user_id', Auth::id())->delete();
 
-        // Nanti ini kita arahkan ke halaman detail pesanan/pembayaran (Midtrans)
+        // 4. KIRIM WA (WAJIB SEBELUM RETURN)
+        try {
+            $wa = new FonnteService();
+            $nomorAdmin = '08xxxxxxxxxx'; // Pastikan nomor ini benar
+            $pesanAdmin = "🔔 *PESANAN BARU MASUK*\n\n" .
+                        "Kode: {$pesanan->kode_pesanan}\n" .
+                        "Pelanggan: " . Auth::user()->name . "\n" .
+                        "Jenis: " . ucfirst($pesanan->jenis_pesanan) . "\n" .
+                        "Total: Rp " . number_format($pesanan->total_harga, 0, ',', '.') . "\n\n" .
+                        "Silakan cek dashboard admin untuk proses lebih lanjut.";
+            $wa->sendMessage($nomorAdmin, $pesanAdmin);
+        } catch (\Exception $e) {
+            // Log error jika WA gagal agar tidak mengganggu flow checkout
+            \Log::error('Gagal kirim WA Admin: ' . $e->getMessage());
+        }
+
+        // 5. BARU RETURN
         return redirect()->route('pelanggan.dashboard')->with('success', 'Pesanan berhasil dibuat! Kode Pesanan: ' . $kode_pesanan);
     }
 }

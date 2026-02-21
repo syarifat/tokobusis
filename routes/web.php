@@ -16,6 +16,7 @@ use App\Http\Controllers\Pelanggan\EventController as PelangganEventController;
 use App\Http\Controllers\Pelanggan\CheckoutController;
 use App\Http\Controllers\Pelanggan\PesananController as PelangganPesanan;
 use App\Http\Controllers\Pelanggan\PembayaranController;
+use App\Services\FonnteService;
 
 Route::get('/', function () {
     return view('welcome');
@@ -57,4 +58,9 @@ Route::middleware('auth')->group(function () {
 
 Route::post('/midtrans/webhook', [App\Http\Controllers\MidtransWebhookController::class, 'handler']);
 
+Route::get('/test-wa', function() {
+    $wa = new FonnteService();
+    // Ganti dengan nomor WhatsApp kamu
+    return $wa->sendMessage('087842949212', 'Halo Syarif! Ini tes notifikasi dari Toko Bu Sis.');
+});
 require __DIR__.'/auth.php';

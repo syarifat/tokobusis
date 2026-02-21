@@ -98,19 +98,27 @@ class CheckoutController extends Controller
         // 3. Kosongkan Keranjang
         Keranjang::where('user_id', Auth::id())->delete();
 
-        // 4. KIRIM WA (WAJIB SEBELUM RETURN)
+        // 4. KIRIM WA (MENGAMBIL DARI DATABASE)
         try {
             $wa = new FonnteService();
-            $nomorAdmin = '08xxxxxxxxxx'; // Pastikan nomor ini benar
-            $pesanAdmin = "🔔 *PESANAN BARU MASUK*\n\n" .
-                        "Kode: {$pesanan->kode_pesanan}\n" .
-                        "Pelanggan: " . Auth::user()->name . "\n" .
-                        "Jenis: " . ucfirst($pesanan->jenis_pesanan) . "\n" .
-                        "Total: Rp " . number_format($pesanan->total_harga, 0, ',', '.') . "\n\n" .
-                        "Silakan cek dashboard admin untuk proses lebih lanjut.";
-            $wa->sendMessage($nomorAdmin, $pesanAdmin);
+            
+            // Mencari user dengan role admin (mengambil yang pertama ditemukan)
+            $admin = \App\Models\User::where('role', 'admin')->first();
+
+            // Pastikan admin ditemukan dan memiliki nomor HP
+            if ($admin && $admin->no_hp) {
+                $nomorAdmin = $admin->no_hp; 
+                
+                $pesanAdmin = "🔔 *PESANAN BARU MASUK*\n\n" .
+                            "Kode: {$pesanan->kode_pesanan}\n" .
+                            "Pelanggan: " . Auth::user()->name . "\n" .
+                            "Jenis: " . ucfirst($pesanan->jenis_pesanan) . "\n" .
+                            "Total: Rp " . number_format($pesanan->total_harga, 0, ',', '.') . "\n\n" .
+                            "Silakan cek dashboard admin untuk proses lebih lanjut.";
+                            
+                $wa->sendMessage($nomorAdmin, $pesanAdmin);
+            }
         } catch (\Exception $e) {
-            // Log error jika WA gagal agar tidak mengganggu flow checkout
             \Log::error('Gagal kirim WA Admin: ' . $e->getMessage());
         }
 

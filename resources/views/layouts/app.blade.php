@@ -15,8 +15,11 @@
         @vite(['resources/css/app.css', 'resources/js/app.js'])
     </head>
     <body class="font-sans antialiased">
-        <div class="min-h-screen bg-gray-100">
-            @include('layouts.navigation')
+        <div class="min-h-screen bg-gray-50"> @if(Auth::user()->role === 'admin')
+                @include('layouts.navigation-admin')
+            @else
+                @include('layouts.navigation-pelanggan')
+            @endif
 
             <!-- Page Heading -->
             @isset($header)

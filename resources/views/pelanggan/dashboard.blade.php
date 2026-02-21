@@ -57,13 +57,6 @@
                 </template>
             </form>
 
-            <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 mb-8">
-                <form action="{{ route('pelanggan.dashboard') }}" method="GET" class="flex flex-col md:flex-row gap-4">
-                    <input type="text" name="search" value="{{ request('search') }}" placeholder="Cari produk favorit..." class="flex-1 border-gray-200 focus:border-blue-500 focus:ring-blue-500 rounded-xl shadow-sm">
-                    <button type="submit" class="bg-blue-600 text-white font-bold py-2 px-8 rounded-xl">Cari</button>
-                </form>
-            </div>
-
             <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
                 @forelse ($barangs as $barang)
                     <div class="bg-white rounded-3xl shadow-sm border-2 overflow-hidden flex flex-col group transition-all duration-300"

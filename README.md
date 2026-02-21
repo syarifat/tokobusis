@@ -1,1 +1,1 @@
-tes pull aldo tes
+tes pull aldo tes private

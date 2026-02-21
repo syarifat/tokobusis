@@ -2,7 +2,12 @@
 
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
+// ADMIN
 use App\Http\Controllers\Admin\DashboardController as AdminDashboard;
+use App\Http\Controllers\Admin\KategoriController;
+use App\Http\Controllers\Admin\BarangController;
+
+//PELANGGAN
 use App\Http\Controllers\Pelanggan\DashboardController as PelangganDashboard;
 
 Route::get('/', function () {
@@ -12,7 +17,8 @@ Route::get('/', function () {
 // Route khusus Admin
 Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/dashboard', [AdminDashboard::class, 'index'])->name('dashboard');
-    // Nanti tambahkan route kelola produk, kategori, pesanan di sini
+    Route::resource('kategori', KategoriController::class);
+    Route::resource('barang', BarangController::class);
 });
 
 // Route khusus Pelanggan

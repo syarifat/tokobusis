@@ -70,4 +70,39 @@ class KeranjangController extends Controller
 
         return redirect()->back()->with('success', 'Barang dihapus dari keranjang.');
     }
+
+    public function bulkStore(Request $request)
+    {
+        // Validasi input: items sekarang harus berisi array dengan id dan qty
+        $request->validate([
+            'items' => 'required|array',
+            'items.*.id' => 'required|exists:barangs,id',
+            'items.*.qty' => 'required|integer|min:1'
+        ]);
+
+        foreach ($request->items as $item) {
+            $barangId = $item['id'];
+            $qtyInput = $item['qty'];
+
+            // Cek apakah barang sudah ada di keranjang user
+            $keranjang = Keranjang::where('user_id', Auth::id())
+                ->where('barang_id', $barangId)
+                ->first();
+
+            if ($keranjang) {
+                // Jika sudah ada, tambahkan qty dari input ke qty yang sudah ada
+                $keranjang->increment('qty', $qtyInput);
+            } else {
+                // Jika belum ada, buat record baru dengan qty sesuai input
+                Keranjang::create([
+                    'user_id' => Auth::id(),
+                    'barang_id' => $barangId,
+                    'qty' => $qtyInput
+                ]);
+            }
+        }
+
+        return redirect()->route('pelanggan.keranjang.index')
+            ->with('success', count($request->items) . ' jenis barang berhasil ditambahkan!');
+    }
 }

@@ -41,6 +41,7 @@ Route::middleware(['auth', 'role:pelanggan'])->prefix('pelanggan')->name('pelang
     Route::post('/keranjang/tambah', [KeranjangController::class, 'store'])->name('keranjang.store');
     Route::put('/keranjang/update/{keranjang}', [KeranjangController::class, 'update'])->name('keranjang.update');
     Route::delete('/keranjang/hapus/{keranjang}', [KeranjangController::class, 'destroy'])->name('keranjang.destroy');
+    Route::post('/keranjang/bulk-store', [KeranjangController::class, 'bulkStore'])->name('keranjang.bulkStore');
     Route::get('/event', [PelangganEventController::class, 'index'])->name('event.index');
     Route::post('/event/ajukan', [PelangganEventController::class, 'store'])->name('event.store');
     Route::get('/checkout', [CheckoutController::class, 'index'])->name('checkout.index');

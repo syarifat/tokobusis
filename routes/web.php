@@ -9,6 +9,7 @@ use App\Http\Controllers\Admin\BarangController;
 
 //PELANGGAN
 use App\Http\Controllers\Pelanggan\DashboardController as PelangganDashboard;
+use App\Http\Controllers\Pelanggan\KeranjangController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -24,7 +25,11 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
 // Route khusus Pelanggan
 Route::middleware(['auth', 'role:pelanggan'])->prefix('pelanggan')->name('pelanggan.')->group(function () {
     Route::get('/dashboard', [PelangganDashboard::class, 'index'])->name('dashboard');
-    // Nanti tambahkan route keranjang, checkout, riwayat pesanan di sini
+    // Keranjang Belanja
+    Route::get('/keranjang', [KeranjangController::class, 'index'])->name('keranjang.index');
+    Route::post('/keranjang/tambah', [KeranjangController::class, 'store'])->name('keranjang.store');
+    Route::put('/keranjang/update/{keranjang}', [KeranjangController::class, 'update'])->name('keranjang.update');
+    Route::delete('/keranjang/hapus/{keranjang}', [KeranjangController::class, 'destroy'])->name('keranjang.destroy');
 });
 
 Route::middleware('auth')->group(function () {

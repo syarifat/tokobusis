@@ -15,6 +15,7 @@ use App\Http\Controllers\Pelanggan\KeranjangController;
 use App\Http\Controllers\Pelanggan\EventController as PelangganEventController;
 use App\Http\Controllers\Pelanggan\CheckoutController;
 use App\Http\Controllers\Pelanggan\PesananController as PelangganPesanan;
+use App\Http\Controllers\Pelanggan\PembayaranController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -45,6 +46,7 @@ Route::middleware(['auth', 'role:pelanggan'])->prefix('pelanggan')->name('pelang
     Route::post('/checkout/proses', [CheckoutController::class, 'process'])->name('checkout.process');
     Route::get('/pesanan', [PelangganPesanan::class, 'index'])->name('pesanan.index');
     Route::get('/pesanan/{pesanan}', [PelangganPesanan::class, 'show'])->name('pesanan.show');
+    Route::post('/pesanan/{pesanan}/pay', [PembayaranController::class, 'pay'])->name('pembayaran.pay');
 });
 
 Route::middleware('auth')->group(function () {
@@ -52,5 +54,7 @@ Route::middleware('auth')->group(function () {
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
+
+Route::post('/midtrans/webhook', [App\Http\Controllers\MidtransWebhookController::class, 'handler']);
 
 require __DIR__.'/auth.php';

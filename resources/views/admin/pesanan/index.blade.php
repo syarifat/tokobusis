@@ -21,11 +21,12 @@
                             <th class="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-center text-xs font-semibold text-gray-600 uppercase">Status Bayar</th>
                             <th class="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-center text-xs font-semibold text-gray-600 uppercase">Status Pesanan</th>
                             <th class="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-center text-xs font-semibold text-gray-600 uppercase">Jenis</th>
+                            <th class="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-center text-xs font-semibold text-gray-600 uppercase">Aksi</th>
                         </tr>
                     </thead>
                     <tbody>
                         @foreach($pesanans as $p)
-                        <tr>
+                        <tr class="hover:bg-gray-50 transition">
                             <td class="px-5 py-5 border-b border-gray-200 text-sm">
                                 <p class="font-bold text-gray-900">{{ $p->user->name }}</p>
                                 <p class="text-xs text-gray-500">{{ $p->user->no_hp }}</p>
@@ -34,7 +35,7 @@
                             <td class="px-5 py-5 border-b border-gray-200 text-sm">
                                 <p class="font-mono text-indigo-600 font-bold">{{ $p->kode_pesanan }}</p>
                                 <p class="text-xs font-semibold text-gray-600">Total: Rp {{ number_format($p->total_harga, 0, ',', '.') }}</p>
-                                <p class="text-xs italic bg-gray-100 px-1 inline-block">Tgl Antar: {{ \Carbon\Carbon::parse($p->tanggal_pengantaran)->format('d/m/Y') }}</p>
+                                <p class="text-xs italic bg-gray-100 px-1 inline-block mt-1">Tgl Antar: {{ \Carbon\Carbon::parse($p->tanggal_pengantaran)->format('d/m/Y') }}</p>
                             </td>
 
                             <td class="px-5 py-5 border-b border-gray-200 text-sm text-center">
@@ -53,7 +54,7 @@
                             <td class="px-5 py-5 border-b border-gray-200 text-sm text-center">
                                 <form action="{{ route('admin.pesanan.updateStatus', $p->id) }}" method="POST">
                                     @csrf @method('PUT')
-                                    <select name="status" onchange="this.form.submit()" class="text-xs rounded border-gray-300 focus:ring-indigo-500">
+                                    <select name="status" onchange="this.form.submit()" class="text-xs rounded border-gray-300 focus:ring-indigo-500 cursor-pointer">
                                         <option value="menunggu" {{ $p->status_pesanan == 'menunggu' ? 'selected' : '' }}>Menunggu</option>
                                         <option value="proses" {{ $p->status_pesanan == 'proses' ? 'selected' : '' }}>Diproses</option>
                                         <option value="dikirim" {{ $p->status_pesanan == 'dikirim' ? 'selected' : '' }}>Dikirim</option>
@@ -70,6 +71,13 @@
                                 @if($p->nama_event)
                                     <p class="text-[9px] text-gray-500 mt-1 uppercase">{{ $p->nama_event }}</p>
                                 @endif
+                            </td>
+                            
+                            <td class="px-5 py-5 border-b border-gray-200 text-sm text-center">
+                                <a href="{{ route('admin.pesanan.show', $p->id) }}" class="inline-flex items-center px-3 py-1.5 bg-indigo-50 text-indigo-600 hover:bg-indigo-600 hover:text-white rounded-md font-bold text-xs transition-colors duration-200 border border-indigo-200">
+                                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
+                                    Detail
+                                </a>
                             </td>
                         </tr>
                         @endforeach

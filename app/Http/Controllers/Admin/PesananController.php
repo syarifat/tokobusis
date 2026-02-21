@@ -14,6 +14,14 @@ class PesananController extends Controller
         return view('admin.pesanan.index', compact('pesanans'));
     }
 
+    // FUNGSI BARU UNTUK MENAMPILKAN DETAIL
+    public function show(Pesanan $pesanan)
+    {
+        // Load relasi agar query lebih efisien
+        $pesanan->load(['user', 'items.barang', 'pembayarans']);
+        return view('admin.pesanan.show', compact('pesanan'));
+    }
+
     public function updateStatus(Request $request, Pesanan $pesanan)
     {
         $pesanan->update(['status_pesanan' => $request->status]);

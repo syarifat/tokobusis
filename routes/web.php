@@ -31,6 +31,7 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::put('/event/{event}/status', [AdminEventController::class, 'updateStatus'])->name('event.updateStatus');
     Route::get('/pesanan', [AdminPesanan::class, 'index'])->name('pesanan.index');
     Route::put('/pesanan/{pesanan}/status', [AdminPesanan::class, 'updateStatus'])->name('pesanan.updateStatus');
+    Route::get('/pesanan/{pesanan}', [AdminPesanan::class, 'show'])->name('pesanan.show');
 });
 
 // Route khusus Pelanggan

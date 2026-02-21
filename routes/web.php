@@ -7,12 +7,14 @@ use App\Http\Controllers\Admin\DashboardController as AdminDashboard;
 use App\Http\Controllers\Admin\KategoriController;
 use App\Http\Controllers\Admin\BarangController;
 use App\Http\Controllers\Admin\EventController as AdminEventController;
+use App\Http\Controllers\Admin\PesananController as AdminPesanan;
 
 //PELANGGAN
 use App\Http\Controllers\Pelanggan\DashboardController as PelangganDashboard;
 use App\Http\Controllers\Pelanggan\KeranjangController;
 use App\Http\Controllers\Pelanggan\EventController as PelangganEventController;
 use App\Http\Controllers\Pelanggan\CheckoutController;
+use App\Http\Controllers\Pelanggan\PesananController as PelangganPesanan;
 
 Route::get('/', function () {
     return view('welcome');
@@ -25,6 +27,8 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::resource('barang', BarangController::class);
     Route::get('/event', [AdminEventController::class, 'index'])->name('event.index');
     Route::put('/event/{event}/status', [AdminEventController::class, 'updateStatus'])->name('event.updateStatus');
+    Route::get('/pesanan', [AdminPesanan::class, 'index'])->name('pesanan.index');
+    Route::put('/pesanan/{pesanan}/status', [AdminPesanan::class, 'updateStatus'])->name('pesanan.updateStatus');
 });
 
 // Route khusus Pelanggan
@@ -39,6 +43,8 @@ Route::middleware(['auth', 'role:pelanggan'])->prefix('pelanggan')->name('pelang
     Route::post('/event/ajukan', [PelangganEventController::class, 'store'])->name('event.store');
     Route::get('/checkout', [CheckoutController::class, 'index'])->name('checkout.index');
     Route::post('/checkout/proses', [CheckoutController::class, 'process'])->name('checkout.process');
+    Route::get('/pesanan', [PelangganPesanan::class, 'index'])->name('pesanan.index');
+    Route::get('/pesanan/{pesanan}', [PelangganPesanan::class, 'show'])->name('pesanan.show');
 });
 
 Route::middleware('auth')->group(function () {

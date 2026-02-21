@@ -19,6 +19,9 @@
                     </x-nav-link>
 
                     @if(Auth::user()->role === 'admin')
+                        <x-nav-link :href="route('admin.pesanan.index')" :active="request()->routeIs('admin.pesanan.*')">
+                            {{ __('Pesanan Masuk') }}
+                        </x-nav-link>
                         <x-nav-link :href="route('admin.barang.index')" :active="request()->routeIs('admin.barang.*')">
                             {{ __('Barang') }}
                         </x-nav-link>
@@ -31,8 +34,11 @@
                     @endif
 
                     @if(Auth::user()->role === 'pelanggan')
+                        <x-nav-link :href="route('pelanggan.pesanan.index')" :active="request()->routeIs('pelanggan.pesanan.*')">
+                            {{ __('Riwayat Belanja') }}
+                        </x-nav-link>
                         <x-nav-link :href="route('pelanggan.keranjang.index')" :active="request()->routeIs('pelanggan.keranjang.*')">
-                            {{ __('Keranjang Belanja') }}
+                            {{ __('Keranjang') }}
                         </x-nav-link>
                         <x-nav-link :href="route('pelanggan.event.index')" :active="request()->routeIs('pelanggan.event.*')">
                             {{ __('Pengajuan Event') }}
@@ -46,7 +52,6 @@
                     <x-slot name="trigger">
                         <button class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-gray-500 bg-white hover:text-gray-700 focus:outline-none transition ease-in-out duration-150">
                             <div>{{ Auth::user()->name }}</div>
-
                             <div class="ms-1">
                                 <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
                                     <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
@@ -62,7 +67,6 @@
 
                         <form method="POST" action="{{ route('logout') }}">
                             @csrf
-
                             <x-dropdown-link :href="route('logout')"
                                     onclick="event.preventDefault();
                                                 this.closest('form').submit();">
@@ -91,6 +95,9 @@
             </x-responsive-nav-link>
 
             @if(Auth::user()->role === 'admin')
+                <x-responsive-nav-link :href="route('admin.pesanan.index')" :active="request()->routeIs('admin.pesanan.*')">
+                    {{ __('Pesanan Masuk') }}
+                </x-responsive-nav-link>
                 <x-responsive-nav-link :href="route('admin.barang.index')" :active="request()->routeIs('admin.barang.*')">
                     {{ __('Barang') }}
                 </x-responsive-nav-link>
@@ -98,17 +105,20 @@
                     {{ __('Kategori') }}
                 </x-responsive-nav-link>
                 <x-responsive-nav-link :href="route('admin.event.index')" :active="request()->routeIs('admin.event.*')">
-                            {{ __('Pengajuan Event') }}
-                        </x-responsive-nav-link>
+                    {{ __('Pengajuan Event') }}
+                </x-responsive-nav-link>
             @endif
 
             @if(Auth::user()->role === 'pelanggan')
+                <x-responsive-nav-link :href="route('pelanggan.pesanan.index')" :active="request()->routeIs('pelanggan.pesanan.*')">
+                    {{ __('Riwayat Belanja') }}
+                </x-responsive-nav-link>
                 <x-responsive-nav-link :href="route('pelanggan.keranjang.index')" :active="request()->routeIs('pelanggan.keranjang.*')">
-                    {{ __('Keranjang Belanja') }}
+                    {{ __('Keranjang') }}
                 </x-responsive-nav-link>
                 <x-responsive-nav-link :href="route('pelanggan.event.index')" :active="request()->routeIs('pelanggan.event.*')">
-                            {{ __('Pengajuan Event') }}
-                        </x-responsive-nav-link>
+                    {{ __('Pengajuan Event') }}
+                </x-responsive-nav-link>
             @endif
         </div>
 
@@ -125,7 +135,6 @@
 
                 <form method="POST" action="{{ route('logout') }}">
                     @csrf
-
                     <x-responsive-nav-link :href="route('logout')"
                             onclick="event.preventDefault();
                                         this.closest('form').submit();">

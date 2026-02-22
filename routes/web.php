@@ -10,6 +10,7 @@ use App\Http\Controllers\Admin\EventController as AdminEventController;
 use App\Http\Controllers\Admin\PesananController as AdminPesanan;
 use App\Http\Controllers\Admin\StokController;
 use App\Http\Controllers\Admin\PelangganController;
+use App\Http\Controllers\Admin\LaporanController;
 
 //PELANGGAN
 use App\Http\Controllers\Pelanggan\DashboardController as PelangganDashboard;
@@ -40,6 +41,8 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::get('/pelanggan/{pelanggan}/edit', [PelangganController::class, 'edit'])->name('pelanggan.edit');
     Route::put('/pelanggan/{pelanggan}', [PelangganController::class, 'update'])->name('pelanggan.update');
     Route::delete('/pelanggan/{pelanggan}', [PelangganController::class, 'destroy'])->name('pelanggan.destroy');
+    Route::get('/laporan', [LaporanController::class, 'index'])->name('laporan.index');
+    Route::get('/laporan/pdf', [LaporanController::class, 'exportPdf'])->name('laporan.pdf');
 });
 
 // Route khusus Pelanggan

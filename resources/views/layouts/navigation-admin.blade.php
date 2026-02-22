@@ -58,6 +58,7 @@
                     </div>
 
                     <x-nav-link :href="route('admin.pelanggan.index')" :active="request()->routeIs('admin.pelanggan.*')">Pelanggan</x-nav-link>
+                    <x-nav-link :href="route('admin.laporan.index')" :active="request()->routeIs('admin.laporan.*')">Laporan Penjualan</x-nav-link>
                 </div>
             </div>
 

@@ -16,13 +16,25 @@ use App\Services\FonnteService;
 class CheckoutController extends Controller
 {
     // Menampilkan Halaman Checkout
-    public function index()
+    public function index(Request $request) 
     {
-        $keranjangs = Keranjang::with('barang')->where('user_id', Auth::id())->get();
+        // Ambil array ID yang dicentang dari form keranjang
+        $selectedIds = $request->input('selected_items', []);
+
+        // Jika user mengakses halaman ini tanpa mencentang apapun, kembalikan ke keranjang
+        if (empty($selectedIds)) {
+            return redirect()->route('pelanggan.keranjang.index')->with('error', 'Pilih minimal satu barang untuk di-checkout.');
+        }
+
+        // Hanya ambil keranjang yang ID-nya ada di array $selectedIds
+        $keranjangs = Keranjang::with('barang')
+            ->where('user_id', Auth::id())
+            ->whereIn('id', $selectedIds)
+            ->get();
         
-        // Cegah akses jika keranjang kosong
+        // Cegah akses jika keranjang kosong atau ID yang dikirim tidak valid
         if ($keranjangs->isEmpty()) {
-            return redirect()->route('pelanggan.keranjang.index')->with('error', 'Keranjang belanja masih kosong.');
+            return redirect()->route('pelanggan.keranjang.index')->with('error', 'Keranjang belanja tidak valid atau kosong.');
         }
 
         $totalKeseluruhan = $keranjangs->sum(function($item) {
@@ -31,8 +43,8 @@ class CheckoutController extends Controller
 
         // Cek apakah user punya event yang DISETUJUI
         $eventsDisetujui = PengajuanEvent::where('user_id', Auth::id())
-                                         ->where('status', 'disetujui')
-                                         ->get();
+                                        ->where('status', 'disetujui')
+                                        ->get();
 
         return view('pelanggan.checkout.index', compact('keranjangs', 'totalKeseluruhan', 'eventsDisetujui'));
     }
@@ -41,15 +53,22 @@ class CheckoutController extends Controller
     public function process(Request $request)
     {
         $request->validate([
+            'selected_items'      => 'required|array', // Validasi array ID keranjang yang dibawa dari view
+            'selected_items.*'    => 'exists:keranjangs,id',
             'tanggal_pengantaran' => 'required|date|after_or_equal:today',
             'jenis_pesanan'       => 'required|in:reguler,event',
             'event_id'            => 'required_if:jenis_pesanan,event',
             'catatan'             => 'nullable|string'
         ]);
 
-        $keranjangs = Keranjang::with('barang')->where('user_id', Auth::id())->get();
+        // Ambil HANYA keranjang yang dipilih berdasarkan ID dari hidden input
+        $keranjangs = Keranjang::with('barang')
+            ->where('user_id', Auth::id())
+            ->whereIn('id', $request->selected_items)
+            ->get();
+
         if ($keranjangs->isEmpty()) {
-            return redirect()->route('pelanggan.dashboard');
+            return redirect()->route('pelanggan.dashboard')->with('error', 'Tidak ada barang yang dipilih untuk checkout.');
         }
 
         $totalKeseluruhan = $keranjangs->sum(function($item) {
@@ -95,8 +114,10 @@ class CheckoutController extends Controller
             $item->barang->decrement('stok', $item->qty);
         }
 
-        // 3. Kosongkan Keranjang
-        Keranjang::where('user_id', Auth::id())->delete();
+        // 3. Kosongkan HANYA Keranjang yang Dipilih
+        Keranjang::where('user_id', Auth::id())
+            ->whereIn('id', $request->selected_items)
+            ->delete();
 
         // 4. KIRIM WA (MENGAMBIL DARI DATABASE)
         try {
@@ -123,6 +144,8 @@ class CheckoutController extends Controller
         }
 
         // 5. BARU RETURN
-        return redirect()->route('pelanggan.dashboard')->with('success', 'Pesanan berhasil dibuat! Kode Pesanan: ' . $kode_pesanan);
+        return redirect()
+        ->route('pelanggan.pesanan.show', $pesanan->id)
+        ->with('success', 'Pesanan berhasil dibuat! Kode Pesanan: ' . $kode_pesanan);
     }
 }

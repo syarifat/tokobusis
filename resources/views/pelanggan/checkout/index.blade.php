@@ -9,6 +9,10 @@
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <form action="{{ route('pelanggan.checkout.process') }}" method="POST" class="grid grid-cols-1 md:grid-cols-3 gap-6">
                 @csrf
+                
+                @foreach($keranjangs as $item)
+                    <input type="hidden" name="selected_items[]" value="{{ $item->id }}">
+                @endforeach
 
                 <div class="md:col-span-2 space-y-6">
                     

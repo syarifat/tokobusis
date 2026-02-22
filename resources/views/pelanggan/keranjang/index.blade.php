@@ -5,7 +5,38 @@
         </h2>
     </x-slot>
 
-    <div class="py-12">
+    <div class="py-12" x-data="{
+        // Ambil data keranjang dari backend dan ubah jadi array Javascript
+        items: {{ json_encode($keranjangs->map(function($k) { 
+            return ['id' => $k->id, 'subtotal' => $k->barang->harga * $k->qty, 'selected' => false]; 
+        })) }},
+        
+        // Hitung total harga otomatis
+        get total() {
+            return this.items.filter(i => i.selected).reduce((sum, i) => sum + i.subtotal, 0);
+        },
+        
+        // Hitung jumlah barang yang dicentang
+        get selectedCount() {
+            return this.items.filter(i => i.selected).length;
+        },
+        
+        // Cek apakah semua tercentang
+        get allSelected() {
+            return this.items.length > 0 && this.selectedCount === this.items.length;
+        },
+        
+        // Fungsi centang semua
+        toggleAll() {
+            let state = !this.allSelected;
+            this.items.forEach(i => i.selected = state);
+        },
+        
+        // Format rupiah
+        formatRupiah(angka) {
+            return new Intl.NumberFormat('id-ID').format(angka);
+        }
+    }">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             
             @if (session('success'))
@@ -21,6 +52,9 @@
                             <table class="min-w-full leading-normal mb-6">
                                 <thead>
                                     <tr>
+                                        <th class="px-5 py-3 border-b-2 border-gray-200 bg-gray-50 text-center w-12">
+                                            <input type="checkbox" :checked="allSelected" @change="toggleAll()" class="w-5 h-5 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer">
+                                        </th>
                                         <th class="px-5 py-3 border-b-2 border-gray-200 bg-gray-50 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Produk</th>
                                         <th class="px-5 py-3 border-b-2 border-gray-200 bg-gray-50 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Harga Satuan</th>
                                         <th class="px-5 py-3 border-b-2 border-gray-200 bg-gray-50 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider">Jumlah</th>
@@ -29,14 +63,15 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    @php $totalKeseluruhan = 0; @endphp
-                                    @foreach($keranjangs as $item)
-                                        @php 
-                                            $subtotal = $item->barang->harga * $item->qty;
-                                            $totalKeseluruhan += $subtotal;
-                                        @endphp
-                                        <tr>
-                                            <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm">
+                                    @foreach($keranjangs as $index => $item)
+                                        @php $subtotal = $item->barang->harga * $item->qty; @endphp
+                                        <tr :class="items[{{ $index }}].selected ? 'bg-indigo-50/30' : ''" class="transition-colors duration-150">
+                                            
+                                            <td class="px-5 py-5 border-b border-gray-200 text-center">
+                                                <input type="checkbox" x-model="items[{{ $index }}].selected" class="w-5 h-5 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer">
+                                            </td>
+
+                                            <td class="px-5 py-5 border-b border-gray-200 text-sm">
                                                 <div class="flex items-center">
                                                     <div class="flex-shrink-0 w-12 h-12 bg-gray-200 rounded">
                                                         @if($item->barang->gambar)
@@ -51,11 +86,11 @@
                                                 </div>
                                             </td>
                                             
-                                            <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm">
+                                            <td class="px-5 py-5 border-b border-gray-200 text-sm">
                                                 Rp {{ number_format($item->barang->harga, 0, ',', '.') }}
                                             </td>
                                             
-                                            <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm text-center">
+                                            <td class="px-5 py-5 border-b border-gray-200 text-sm text-center">
                                                 <form action="{{ route('pelanggan.keranjang.update', $item->id) }}" method="POST" class="flex items-center justify-center gap-2">
                                                     @csrf
                                                     @method('PUT')
@@ -68,11 +103,11 @@
                                                 </form>
                                             </td>
                                             
-                                            <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm text-right font-semibold text-gray-700">
+                                            <td class="px-5 py-5 border-b border-gray-200 text-sm text-right font-semibold text-gray-700">
                                                 Rp {{ number_format($subtotal, 0, ',', '.') }}
                                             </td>
                                             
-                                            <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm text-center">
+                                            <td class="px-5 py-5 border-b border-gray-200 text-sm text-center">
                                                 <form action="{{ route('pelanggan.keranjang.destroy', $item->id) }}" method="POST" onsubmit="return confirm('Hapus barang ini dari keranjang?');">
                                                     @csrf
                                                     @method('DELETE')
@@ -89,7 +124,7 @@
                             </table>
                         </div>
 
-                        <div class="flex flex-col md:flex-row justify-between items-center bg-gray-50 p-6 rounded-lg border border-gray-200 mt-4">
+                        <div class="flex flex-col md:flex-row justify-between items-center bg-gray-50 p-6 rounded-lg border border-gray-200 mt-4 sticky bottom-0 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]">
                             <div class="mb-4 md:mb-0">
                                 <a href="{{ route('pelanggan.dashboard') }}" class="text-indigo-600 hover:text-indigo-800 font-semibold flex items-center">
                                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -100,12 +135,22 @@
                             </div>
                             <div class="text-right flex flex-col md:flex-row items-center gap-6">
                                 <div>
-                                    <span class="text-gray-600">Total Keseluruhan:</span>
-                                    <span class="text-2xl font-bold text-gray-900 block md:inline md:ml-2">Rp {{ number_format($totalKeseluruhan, 0, ',', '.') }}</span>
+                                    <span class="text-gray-600">Total (<span x-text="selectedCount"></span> produk):</span>
+                                    <span class="text-2xl font-bold text-indigo-600 block md:inline md:ml-2">Rp <span x-text="formatRupiah(total)"></span></span>
                                 </div>
-                                <a href="{{ route('pelanggan.checkout.index') }}" class="bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-8 rounded-lg shadow-lg transition duration-200">
-                                    Lanjut ke Checkout
-                                </a>
+                                
+                                <form action="{{ route('pelanggan.checkout.index') }}" method="GET">
+                                    <template x-for="item in items.filter(i => i.selected)" :key="item.id">
+                                        <input type="hidden" name="selected_items[]" :value="item.id">
+                                    </template>
+                                    
+                                    <button type="submit" 
+                                            :disabled="selectedCount === 0" 
+                                            :class="selectedCount === 0 ? 'bg-gray-400 cursor-not-allowed' : 'bg-green-600 hover:bg-green-700'" 
+                                            class="text-white font-bold py-3 px-8 rounded-lg shadow-lg transition duration-200">
+                                        Checkout
+                                    </button>
+                                </form>
                             </div>
                         </div>
 

@@ -9,6 +9,7 @@ use App\Http\Controllers\Admin\BarangController;
 use App\Http\Controllers\Admin\EventController as AdminEventController;
 use App\Http\Controllers\Admin\PesananController as AdminPesanan;
 use App\Http\Controllers\Admin\StokController;
+use App\Http\Controllers\Admin\PelangganController;
 
 //PELANGGAN
 use App\Http\Controllers\Pelanggan\DashboardController as PelangganDashboard;
@@ -35,6 +36,10 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::get('/pesanan/{pesanan}', [AdminPesanan::class, 'show'])->name('pesanan.show');
     Route::get('/stok', [StokController::class, 'index'])->name('stok.index');
     Route::post('/stok', [StokController::class, 'store'])->name('stok.store');
+    Route::get('/pelanggan', [PelangganController::class, 'index'])->name('pelanggan.index');
+    Route::get('/pelanggan/{pelanggan}/edit', [PelangganController::class, 'edit'])->name('pelanggan.edit');
+    Route::put('/pelanggan/{pelanggan}', [PelangganController::class, 'update'])->name('pelanggan.update');
+    Route::delete('/pelanggan/{pelanggan}', [PelangganController::class, 'destroy'])->name('pelanggan.destroy');
 });
 
 // Route khusus Pelanggan

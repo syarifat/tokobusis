@@ -9,8 +9,17 @@
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             
             @if (session('success'))
-                <div class="mb-4 bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative">
+                <div class="mb-4 bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative shadow-sm">
                     <span class="block sm:inline">{{ session('success') }}</span>
+                </div>
+            @endif
+
+            @if (session('error'))
+                <div class="mb-4 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative shadow-sm">
+                    <div class="flex items-center">
+                        <svg class="h-5 w-5 mr-2" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd" /></svg>
+                        <span class="block sm:inline font-bold">{{ session('error') }}</span>
+                    </div>
                 </div>
             @endif
 
@@ -31,7 +40,7 @@
                             </thead>
                             <tbody>
                                 @forelse ($events as $event)
-                                    <tr>
+                                    <tr class="hover:bg-gray-50 transition duration-150">
                                         <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm">
                                             {{ $event->created_at->format('d M Y, H:i') }}
                                         </td>

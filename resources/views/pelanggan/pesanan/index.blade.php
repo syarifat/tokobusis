@@ -13,7 +13,6 @@
                                 <th class="px-5 py-3 border-b-2 border-gray-200 bg-gray-50 text-left text-xs font-semibold text-gray-600 uppercase">Kode Pesanan</th>
                                 <th class="px-5 py-3 border-b-2 border-gray-200 bg-gray-50 text-left text-xs font-semibold text-gray-600 uppercase">Jenis</th>
                                 <th class="px-5 py-3 border-b-2 border-gray-200 bg-gray-50 text-left text-xs font-semibold text-gray-600 uppercase">Total</th>
-                                <th class="px-5 py-3 border-b-2 border-gray-200 bg-gray-50 text-center text-xs font-semibold text-gray-600 uppercase">Status Bayar</th>
                                 <th class="px-5 py-3 border-b-2 border-gray-200 bg-gray-50 text-center text-xs font-semibold text-gray-600 uppercase">Status Pesanan</th>
                                 <th class="px-5 py-3 border-b-2 border-gray-200 bg-gray-50 text-center text-xs font-semibold text-gray-600 uppercase">Aksi</th>
                             </tr>
@@ -26,34 +25,22 @@
                                     <p class="text-xs text-gray-500">{{ $p->created_at->format('d/m/Y H:i') }}</p>
                                 </td>
                                 <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm">
-                                    <span class="px-2 py-1 rounded-full text-[10px] font-semibold {{ $p->jenis_pesanan == 'event' ? 'bg-purple-100 text-purple-800' : 'bg-blue-100 text-blue-800' }}">
+                                    <span class="px-2 py-1 rounded-full text-xs font-semibold {{ $p->jenis_pesanan == 'event' ? 'bg-purple-100 text-purple-800' : 'bg-blue-100 text-blue-800' }}">
                                         {{ ucfirst($p->jenis_pesanan) }}
                                     </span>
                                 </td>
                                 <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm font-bold">
                                     Rp {{ number_format($p->total_harga, 0, ',', '.') }}
                                 </td>
-                                
                                 <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm text-center">
-                                    @if($p->status_pembayaran == 'lunas')
-                                        <span class="text-green-600 font-bold text-xs uppercase">Lunas</span>
-                                    @elseif($p->status_pembayaran == 'cicilan')
-                                        <span class="text-orange-600 font-bold text-xs uppercase">Cicilan</span>
-                                        <p class="text-[10px] text-gray-500">Sisa: Rp {{ number_format($p->total_harga - $p->total_dibayar, 0, ',', '.') }}</p>
-                                    @else
-                                        <span class="text-red-600 font-bold text-xs uppercase">Belum Bayar</span>
-                                    @endif
-                                </td>
-
-                                <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm text-center">
-                                    <span class="text-xs font-semibold px-2 py-1 bg-gray-100 rounded border border-gray-200">{{ strtoupper($p->status_pesanan) }}</span>
+                                    <span class="text-xs font-semibold">{{ strtoupper($p->status_pesanan) }}</span>
                                 </td>
                                 <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm text-center">
                                     <a href="{{ route('pelanggan.pesanan.show', $p->id) }}" class="text-indigo-600 hover:text-indigo-900 font-bold">Detail</a>
                                 </td>
                             </tr>
                             @empty
-                            <tr><td colspan="6" class="p-5 text-center text-gray-500">Belum ada pesanan.</td></tr>
+                            <tr><td colspan="5" class="p-5 text-center text-gray-500">Belum ada pesanan.</td></tr>
                             @endforelse
                         </tbody>
                     </table>

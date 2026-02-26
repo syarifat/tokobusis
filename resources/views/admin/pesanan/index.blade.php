@@ -5,55 +5,32 @@
 
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            
-            @if (session('success'))
-                <div class="mb-4 bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative">
-                    <span class="block sm:inline">{{ session('success') }}</span>
-                </div>
-            @endif
-
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-6">
                 <table class="min-w-full leading-normal">
                     <thead>
                         <tr>
                             <th class="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase">Pelanggan</th>
                             <th class="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase">Detail Pesanan</th>
-                            <th class="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-center text-xs font-semibold text-gray-600 uppercase">Status Bayar</th>
                             <th class="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-center text-xs font-semibold text-gray-600 uppercase">Status Pesanan</th>
-                            <th class="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-center text-xs font-semibold text-gray-600 uppercase">Jenis</th>
+                            <th class="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-center text-xs font-semibold text-gray-600 uppercase">Aksi</th>
                         </tr>
                     </thead>
                     <tbody>
                         @foreach($pesanans as $p)
                         <tr>
                             <td class="px-5 py-5 border-b border-gray-200 text-sm">
-                                <p class="font-bold text-gray-900">{{ $p->user->name }}</p>
-                                <p class="text-xs text-gray-500">{{ $p->user->no_hp }}</p>
+                                <p class="font-bold">{{ $p->user->name }}</p>
+                                <p class="text-xs">{{ $p->user->no_hp }}</p>
                             </td>
-
                             <td class="px-5 py-5 border-b border-gray-200 text-sm">
                                 <p class="font-mono text-indigo-600 font-bold">{{ $p->kode_pesanan }}</p>
                                 <p class="text-xs font-semibold text-gray-600">Total: Rp {{ number_format($p->total_harga, 0, ',', '.') }}</p>
-                                <p class="text-xs italic bg-gray-100 px-1 inline-block">Tgl Antar: {{ \Carbon\Carbon::parse($p->tanggal_pengantaran)->format('d/m/Y') }}</p>
+                                <p class="text-xs italic bg-gray-100 px-1 inline-block">Tgl Antar: {{ $p->tanggal_pengantaran }}</p>
                             </td>
-
-                            <td class="px-5 py-5 border-b border-gray-200 text-sm text-center">
-                                @if($p->status_pembayaran == 'lunas')
-                                    <span class="bg-green-100 text-green-800 py-1 px-3 rounded-full text-xs font-bold uppercase">Lunas</span>
-                                @elseif($p->status_pembayaran == 'cicilan')
-                                    <div class="flex flex-col items-center">
-                                        <span class="bg-orange-100 text-orange-800 py-1 px-3 rounded-full text-xs font-bold uppercase">Cicilan</span>
-                                        <p class="text-[10px] mt-1 text-gray-500">Dibayar: Rp {{ number_format($p->total_dibayar, 0, ',', '.') }}</p>
-                                    </div>
-                                @else
-                                    <span class="bg-red-100 text-red-800 py-1 px-3 rounded-full text-xs font-bold uppercase">Belum Bayar</span>
-                                @endif
-                            </td>
-
                             <td class="px-5 py-5 border-b border-gray-200 text-sm text-center">
                                 <form action="{{ route('admin.pesanan.updateStatus', $p->id) }}" method="POST">
                                     @csrf @method('PUT')
-                                    <select name="status" onchange="this.form.submit()" class="text-xs rounded border-gray-300 focus:ring-indigo-500">
+                                    <select name="status" onchange="this.form.submit()" class="text-xs rounded border-gray-300">
                                         <option value="menunggu" {{ $p->status_pesanan == 'menunggu' ? 'selected' : '' }}>Menunggu</option>
                                         <option value="proses" {{ $p->status_pesanan == 'proses' ? 'selected' : '' }}>Diproses</option>
                                         <option value="dikirim" {{ $p->status_pesanan == 'dikirim' ? 'selected' : '' }}>Dikirim</option>
@@ -62,14 +39,10 @@
                                     </select>
                                 </form>
                             </td>
-
                             <td class="px-5 py-5 border-b border-gray-200 text-sm text-center">
-                                <span class="px-2 py-1 rounded text-white text-[10px] font-bold {{ $p->jenis_pesanan == 'event' ? 'bg-purple-500' : 'bg-blue-500' }}">
+                                <span class="px-2 py-1 rounded text-white text-xs {{ $p->jenis_pesanan == 'event' ? 'bg-purple-500' : 'bg-blue-500' }}">
                                     {{ strtoupper($p->jenis_pesanan) }}
                                 </span>
-                                @if($p->nama_event)
-                                    <p class="text-[9px] text-gray-500 mt-1 uppercase">{{ $p->nama_event }}</p>
-                                @endif
                             </td>
                         </tr>
                         @endforeach

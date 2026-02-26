@@ -15,8 +15,6 @@ use App\Http\Controllers\Pelanggan\KeranjangController;
 use App\Http\Controllers\Pelanggan\EventController as PelangganEventController;
 use App\Http\Controllers\Pelanggan\CheckoutController;
 use App\Http\Controllers\Pelanggan\PesananController as PelangganPesanan;
-use App\Http\Controllers\Pelanggan\PembayaranController;
-use App\Services\FonnteService;
 
 Route::get('/', function () {
     return view('welcome');
@@ -47,7 +45,6 @@ Route::middleware(['auth', 'role:pelanggan'])->prefix('pelanggan')->name('pelang
     Route::post('/checkout/proses', [CheckoutController::class, 'process'])->name('checkout.process');
     Route::get('/pesanan', [PelangganPesanan::class, 'index'])->name('pesanan.index');
     Route::get('/pesanan/{pesanan}', [PelangganPesanan::class, 'show'])->name('pesanan.show');
-    Route::post('/pesanan/{pesanan}/pay', [PembayaranController::class, 'pay'])->name('pembayaran.pay');
 });
 
 Route::middleware('auth')->group(function () {
@@ -56,11 +53,4 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
-Route::post('/midtrans/webhook', [App\Http\Controllers\MidtransWebhookController::class, 'handler']);
-
-Route::get('/test-wa', function() {
-    $wa = new FonnteService();
-    // Ganti dengan nomor WhatsApp kamu
-    return $wa->sendMessage('087842949212', 'Halo Syarif! Ini tes notifikasi dari Toko Bu Sis.');
-});
 require __DIR__.'/auth.php';

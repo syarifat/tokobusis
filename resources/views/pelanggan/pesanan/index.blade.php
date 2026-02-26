@@ -48,21 +48,27 @@
                         <table class="min-w-full leading-normal">
                             <thead>
                                 <tr>
-                                    <th class="px-5 py-3 border-b-2 border-gray-200 bg-gray-50 text-left text-xs font-semibold text-gray-600 uppercase">Kode Pesanan</th>
-                                    <th class="px-5 py-3 border-b-2 border-gray-200 bg-gray-50 text-left text-xs font-semibold text-gray-600 uppercase">Jenis</th>
-                                    <th class="px-5 py-3 border-b-2 border-gray-200 bg-gray-50 text-left text-xs font-semibold text-gray-600 uppercase">Total</th>
-                                    <th class="px-5 py-3 border-b-2 border-gray-200 bg-gray-50 text-center text-xs font-semibold text-gray-600 uppercase">Status Bayar</th>
-                                    <th class="px-5 py-3 border-b-2 border-gray-200 bg-gray-50 text-center text-xs font-semibold text-gray-600 uppercase">Status Pesanan</th>
-                                    <th class="px-5 py-3 border-b-2 border-gray-200 bg-gray-50 text-center text-xs font-semibold text-gray-600 uppercase">Aksi</th>
+                                    <th class="px-5 py-3 border-b-2 border-gray-200 bg-gray-50 text-left text-xs font-semibold text-gray-600 uppercase whitespace-nowrap">Kode Pesanan</th>
+                                    <th class="px-5 py-3 border-b-2 border-gray-200 bg-gray-50 text-center text-xs font-semibold text-gray-600 uppercase whitespace-nowrap">Tanggal</th>
+                                    <th class="px-5 py-3 border-b-2 border-gray-200 bg-gray-50 text-left text-xs font-semibold text-gray-600 uppercase whitespace-nowrap">Jenis</th>
+                                    <th class="px-5 py-3 border-b-2 border-gray-200 bg-gray-50 text-left text-xs font-semibold text-gray-600 uppercase whitespace-nowrap">Total</th>
+                                    <th class="px-5 py-3 border-b-2 border-gray-200 bg-gray-50 text-center text-xs font-semibold text-gray-600 uppercase whitespace-nowrap">Status Bayar</th>
+                                    <th class="px-5 py-3 border-b-2 border-gray-200 bg-gray-50 text-center text-xs font-semibold text-gray-600 uppercase whitespace-nowrap">Status Pesanan</th>
+                                    <th class="px-5 py-3 border-b-2 border-gray-200 bg-gray-50 text-center text-xs font-semibold text-gray-600 uppercase whitespace-nowrap">Aksi</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 @forelse($pesanans as $p)
-                                <tr>
+                                <tr class="hover:bg-gray-50 transition">
                                     <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm">
-                                        <p class="font-bold text-gray-900">{{ $p->kode_pesanan }}</p>
-                                        <p class="text-xs text-gray-500">{{ $p->created_at->format('d/m/Y H:i') }}</p>
+                                        <p class="font-mono font-bold text-indigo-600">{{ $p->kode_pesanan }}</p>
                                     </td>
+
+                                    <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm text-center">
+                                        <p class="font-bold text-gray-700">{{ $p->created_at->format('d/m/Y') }}</p>
+                                        <p class="text-[10px] text-gray-500">{{ $p->created_at->format('H:i') }} WIB</p>
+                                    </td>
+
                                     <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm">
                                         @if($p->jenis_pesanan == 'event')
                                             <span class="px-2 py-1 rounded-full text-[10px] font-semibold bg-purple-100 text-purple-800 uppercase">
@@ -77,6 +83,7 @@
                                             </span>
                                         @endif
                                     </td>
+
                                     <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm font-bold">
                                         Rp {{ number_format($p->total_harga, 0, ',', '.') }}
                                     </td>
@@ -86,7 +93,7 @@
                                             <span class="text-green-600 font-bold text-xs uppercase">Lunas</span>
                                         @elseif($p->status_pembayaran == 'cicilan')
                                             <span class="text-orange-600 font-bold text-xs uppercase">Cicilan</span>
-                                            <p class="text-[10px] text-gray-500">Sisa: Rp {{ number_format($p->total_harga - $p->total_dibayar, 0, ',', '.') }}</p>
+                                            <p class="text-[10px] text-gray-500 mt-1 font-semibold">Sisa: Rp {{ number_format($p->total_harga - $p->total_dibayar, 0, ',', '.') }}</p>
                                         @else
                                             <span class="text-red-600 font-bold text-xs uppercase">Belum Bayar</span>
                                         @endif
@@ -95,13 +102,17 @@
                                     <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm text-center">
                                         <span class="text-xs font-semibold px-2 py-1 bg-gray-100 rounded border border-gray-200">{{ strtoupper($p->status_pesanan) }}</span>
                                     </td>
+
                                     <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm text-center">
-                                        <a href="{{ route('pelanggan.pesanan.show', $p->id) }}" class="text-indigo-600 hover:text-indigo-900 font-bold">Detail</a>
+                                        <a href="{{ route('pelanggan.pesanan.show', $p->id) }}" class="inline-flex items-center px-3 py-1.5 bg-indigo-50 text-indigo-600 hover:bg-indigo-600 hover:text-white rounded-md font-bold text-xs transition-colors duration-200 border border-indigo-200">
+                                            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
+                                            Detail
+                                        </a>
                                     </td>
                                 </tr>
                                 @empty
                                 <tr>
-                                    <td colspan="6" class="p-5 text-center text-gray-500">Tidak ada pesanan yang sesuai dengan filter.</td>
+                                    <td colspan="7" class="p-5 text-center text-gray-500">Tidak ada pesanan yang sesuai dengan filter.</td>
                                 </tr>
                                 @endforelse
                             </tbody>

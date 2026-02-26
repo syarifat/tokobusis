@@ -77,14 +77,28 @@
                                         </div>
                                     </label>
 
-                                    <div x-show="jenis == 'event'" class="mt-4 p-4 bg-yellow-50 rounded border border-yellow-200">
-                                        <label class="block text-yellow-800 text-sm font-bold mb-2">Pilih Event Anda:</label>
-                                        <select name="event_id" class="shadow border rounded w-full py-2 px-3 text-gray-700 focus:outline-none focus:ring-yellow-500 focus:border-yellow-500">
-                                            <option value="">-- Pilih Acara --</option>
-                                            @foreach($eventsDisetujui as $event)
-                                                <option value="{{ $event->id }}">{{ $event->nama_acara }} ({{ \Carbon\Carbon::parse($event->tanggal_acara)->format('d M Y') }})</option>
-                                            @endforeach
-                                        </select>
+                                    <div x-show="jenis == 'event'" class="mt-4 p-4 bg-yellow-50 rounded-lg border border-yellow-200 flex items-start gap-3">
+                                        <div class="flex-shrink-0 mt-0.5">
+                                            <svg class="w-5 h-5 text-yellow-600" fill="currentColor" viewBox="0 0 20 20">
+                                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                                            </svg>
+                                        </div>
+                                        <div class="w-full">
+                                            <h4 class="text-sm font-bold text-yellow-800">Event Aktif Terdeteksi</h4>
+                                            
+                                            @php $activeEvent = $eventsDisetujui->first(); @endphp
+                                            
+                                            <div class="mt-2 p-3 bg-white border border-yellow-100 rounded shadow-sm">
+                                                <p class="font-bold text-gray-900">{{ $activeEvent->nama_acara }}</p>
+                                                <p class="text-xs text-gray-500 mt-1">Jadwal: {{ \Carbon\Carbon::parse($activeEvent->tanggal_acara)->format('d F Y') }}</p>
+                                                
+                                                <input type="hidden" name="event_id" value="{{ $activeEvent->id }}">
+                                            </div>
+                                            
+                                            <p class="text-xs text-yellow-700 mt-2 italic">
+                                                *Tagihan untuk pesanan ini akan masuk ke sistem Bon dan harus dilunasi maksimal H+7 setelah acara selesai.
+                                            </p>
+                                        </div>
                                     </div>
                                 @else
                                     <div class="p-4 bg-gray-50 border border-gray-200 rounded text-sm text-gray-500">

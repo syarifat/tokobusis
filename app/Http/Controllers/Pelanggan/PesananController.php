@@ -9,9 +9,24 @@ use Illuminate\Support\Facades\Auth;
 
 class PesananController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $pesanans = Pesanan::where('user_id', Auth::id())->latest()->get();
+        // Mulai query pesanan milik user yang login
+        $query = Pesanan::where('user_id', Auth::id())->latest();
+
+        // Terapkan Filter Jenis Pesanan jika dipilih
+        if ($request->filled('jenis')) {
+            $query->where('jenis_pesanan', $request->jenis);
+        }
+
+        // Terapkan Filter Status Pembayaran jika dipilih
+        if ($request->filled('status_bayar')) {
+            $query->where('status_pembayaran', $request->status_bayar);
+        }
+
+        // Eksekusi query untuk mengambil data
+        $pesanans = $query->get();
+
         return view('pelanggan.pesanan.index', compact('pesanans'));
     }
 

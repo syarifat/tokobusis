@@ -71,9 +71,4 @@ Route::middleware('auth')->group(function () {
 
 Route::post('/midtrans/webhook', [App\Http\Controllers\MidtransWebhookController::class, 'handler']);
 
-Route::get('/test-wa', function() {
-    $wa = new FonnteService();
-    // Ganti dengan nomor WhatsApp kamu
-    return $wa->sendMessage('087842949212', 'Halo Syarif! Ini tes notifikasi dari Toko Bu Sis.');
-});
 require __DIR__.'/auth.php';

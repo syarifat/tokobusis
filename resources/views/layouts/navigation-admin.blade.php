@@ -48,9 +48,6 @@
                             </x-slot>
                         </x-dropdown>
                     </div>
-
-                    <x-nav-link :href="route('admin.pelanggan.index')" :active="request()->routeIs('admin.pelanggan.*')">Pelanggan</x-nav-link>
-                    <x-nav-link :href="route('admin.laporan.index')" :active="request()->routeIs('admin.laporan.*')">Laporan Penjualan</x-nav-link>
                 </div>
             </div>
 
@@ -100,10 +97,6 @@
             <x-responsive-nav-link :href="route('admin.barang.index')" :active="request()->routeIs('admin.barang.*')">Katalog Barang</x-responsive-nav-link>
             <x-responsive-nav-link :href="route('admin.kategori.index')" :active="request()->routeIs('admin.kategori.*')">Kategori</x-responsive-nav-link>
             <x-responsive-nav-link :href="route('admin.stok.index')" :active="request()->routeIs('admin.stok.*')">Kelola Stok</x-responsive-nav-link>
-
-            <div class="px-4 py-2 mt-2 font-bold text-xs text-indigo-600 uppercase tracking-wider bg-gray-50">Lainnya</div>
-            <x-responsive-nav-link :href="route('admin.pelanggan.index')" :active="request()->routeIs('admin.pelanggan.*')">Pelanggan</x-responsive-nav-link>
-            <x-responsive-nav-link :href="route('admin.laporan.index')" :active="request()->routeIs('admin.laporan.*')">Laporan Penjualan</x-responsive-nav-link>
         </div>
 
         <div class="pt-4 pb-1 border-t border-gray-200 bg-gray-50">

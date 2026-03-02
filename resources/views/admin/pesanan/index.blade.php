@@ -4,13 +4,60 @@
     </x-slot>
 
     <div class="py-12">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
             
             @if (session('success'))
-                <div class="mb-4 bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative">
+                <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative shadow-sm">
                     <span class="block sm:inline">{{ session('success') }}</span>
                 </div>
             @endif
+
+            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
+                <div class="p-6 bg-gray-50 border-b border-gray-100">
+                    <form action="{{ route('admin.pesanan.index') }}" method="GET" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 items-end">
+                        
+                        <div>
+                            <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Jenis Pesanan</label>
+                            <select name="jenis" class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm">
+                                <option value="">Semua Jenis</option>
+                                <option value="reguler" {{ request('jenis') == 'reguler' ? 'selected' : '' }}>Reguler</option>
+                                <option value="event" {{ request('jenis') == 'event' ? 'selected' : '' }}>Event (Bon)</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Status Bayar</label>
+                            <select name="status_bayar" class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm">
+                                <option value="">Semua Status</option>
+                                <option value="belum_bayar" {{ request('status_bayar') == 'belum_bayar' ? 'selected' : '' }}>Belum Bayar</option>
+                                <option value="cicilan" {{ request('status_bayar') == 'cicilan' ? 'selected' : '' }}>Cicilan</option>
+                                <option value="lunas" {{ request('status_bayar') == 'lunas' ? 'selected' : '' }}>Lunas</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Dari Tanggal</label>
+                            <input type="date" name="start_date" value="{{ request('start_date') }}" class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm">
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Sampai Tanggal</label>
+                            <input type="date" name="end_date" value="{{ request('end_date') }}" class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm">
+                        </div>
+
+                        <div class="flex flex-col sm:flex-row gap-2">
+                            <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded-md shadow-sm transition text-sm">
+                                Filter
+                            </button>
+                            @if(request()->has('jenis') || request()->has('status_bayar') || request()->has('start_date'))
+                                <a href="{{ route('admin.pesanan.index') }}" class="w-full bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold py-2 px-4 rounded-md text-center transition text-sm flex items-center justify-center">
+                                    Reset
+                                </a>
+                            @endif
+                        </div>
+                    </form>
+                </div>
+            </div>
 
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-6">
                 <div class="overflow-x-auto">
@@ -18,11 +65,11 @@
                         <thead>
                             <tr>
                                 <th class="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase whitespace-nowrap">Pelanggan</th>
+                                <th class="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-center text-xs font-semibold text-gray-600 uppercase whitespace-nowrap">Jenis</th>
                                 <th class="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-center text-xs font-semibold text-gray-600 uppercase whitespace-nowrap">Tanggal</th>
                                 <th class="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase whitespace-nowrap">Detail Pesanan</th>
                                 <th class="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-center text-xs font-semibold text-gray-600 uppercase whitespace-nowrap">Status Bayar</th>
                                 <th class="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-center text-xs font-semibold text-gray-600 uppercase whitespace-nowrap">Status Pesanan</th>
-                                <th class="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-center text-xs font-semibold text-gray-600 uppercase whitespace-nowrap">Jenis</th>
                                 <th class="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-center text-xs font-semibold text-gray-600 uppercase whitespace-nowrap">Aksi</th>
                             </tr>
                         </thead>
@@ -33,7 +80,16 @@
                                     <p class="font-bold text-gray-900">{{ $p->user->name }}</p>
                                     <p class="text-xs text-gray-500">{{ $p->user->no_hp }}</p>
                                 </td>
-
+                                
+                                <td class="px-5 py-5 border-b border-gray-200 text-sm text-center">
+                                    <span class="px-2 py-1 rounded text-white text-[10px] font-bold {{ $p->jenis_pesanan == 'event' ? 'bg-purple-500' : 'bg-blue-500' }}">
+                                        {{ strtoupper($p->jenis_pesanan) }}
+                                    </span>
+                                    @if($p->nama_event)
+                                        <p class="text-[9px] text-gray-500 mt-1 uppercase truncate w-20 mx-auto" title="{{ $p->nama_event }}">{{ $p->nama_event }}</p>
+                                    @endif
+                                </td>
+                                
                                 <td class="px-5 py-5 border-b border-gray-200 text-sm text-center">
                                     <p class="font-bold text-gray-700">{{ $p->created_at->format('d M Y') }}</p>
                                     <p class="text-xs text-gray-500">{{ $p->created_at->format('H:i') }} WIB</p>
@@ -71,14 +127,6 @@
                                     </form>
                                 </td>
 
-                                <td class="px-5 py-5 border-b border-gray-200 text-sm text-center">
-                                    <span class="px-2 py-1 rounded text-white text-[10px] font-bold {{ $p->jenis_pesanan == 'event' ? 'bg-purple-500' : 'bg-blue-500' }}">
-                                        {{ strtoupper($p->jenis_pesanan) }}
-                                    </span>
-                                    @if($p->nama_event)
-                                        <p class="text-[9px] text-gray-500 mt-1 uppercase truncate w-20 mx-auto" title="{{ $p->nama_event }}">{{ $p->nama_event }}</p>
-                                    @endif
-                                </td>
                                 
                                 <td class="px-5 py-5 border-b border-gray-200 text-sm text-center">
                                     <a href="{{ route('admin.pesanan.show', $p->id) }}" class="inline-flex items-center px-3 py-1.5 bg-indigo-50 text-indigo-600 hover:bg-indigo-600 hover:text-white rounded-md font-bold text-xs transition-colors duration-200 border border-indigo-200">
@@ -89,13 +137,14 @@
                             </tr>
                             @empty
                             <tr>
-                                <td colspan="7" class="px-5 py-10 text-center text-gray-500 border-b border-gray-200">Tidak ada pesanan yang ditemukan.</td>
+                                <td colspan="7" class="px-5 py-10 text-center text-gray-500 border-b border-gray-200">Tidak ada pesanan yang sesuai dengan filter.</td>
                             </tr>
                             @endforelse
                         </tbody>
                     </table>
                 </div>
             </div>
+
         </div>
     </div>
 </x-app-layout>

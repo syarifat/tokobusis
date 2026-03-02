@@ -8,9 +8,37 @@ use Illuminate\Http\Request;
 
 class PesananController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $pesanans = Pesanan::with('user')->latest()->get();
+        // Mulai query dengan eager loading user
+        $query = Pesanan::with('user')->latest();
+
+        // 1. Filter Jenis Pesanan
+        if ($request->filled('jenis')) {
+            $query->where('jenis_pesanan', $request->jenis);
+        }
+
+        // 2. Filter Status Pembayaran
+        if ($request->filled('status_bayar')) {
+            $query->where('status_pembayaran', $request->status_bayar);
+        }
+
+        // 3. Filter Rentang Tanggal (Start Date & End Date)
+        if ($request->filled('start_date') && $request->filled('end_date')) {
+            // Kita gunakan whereBetween untuk rentang waktu. 
+            // Tambahkan waktu 23:59:59 di end_date agar pesanan di hari tersebut ikut terambil
+            $query->whereBetween('created_at', [
+                $request->start_date . ' 00:00:00',
+                $request->end_date . ' 23:59:59'
+            ]);
+        } elseif ($request->filled('start_date')) {
+            $query->whereDate('created_at', '>=', $request->start_date);
+        } elseif ($request->filled('end_date')) {
+            $query->whereDate('created_at', '<=', $request->end_date);
+        }
+
+        $pesanans = $query->get();
+
         return view('admin.pesanan.index', compact('pesanans'));
     }
 

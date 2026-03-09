@@ -18,6 +18,7 @@ class Pesanan extends Model
         'tanggal_pengantaran',
         'tenggat_pembayaran',
         'total_harga',
+        'ongkir',
         'total_dibayar',
         'status_pesanan',
         'status_pembayaran',

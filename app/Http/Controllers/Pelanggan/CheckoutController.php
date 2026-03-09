@@ -9,6 +9,7 @@ use App\Models\PesananItem;
 use App\Models\PengajuanEvent;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log; // <-- Tambahan Use Log agar rapi
 use Illuminate\Support\Str;
 use Carbon\Carbon;
 use App\Services\FonnteService;
@@ -37,23 +38,42 @@ class CheckoutController extends Controller
             return redirect()->route('pelanggan.keranjang.index')->with('error', 'Keranjang belanja tidak valid atau kosong.');
         }
 
-        $totalKeseluruhan = $keranjangs->sum(function($item) {
+        // --- LOGIKA ONGKIR DIMULAI DI SINI ---
+        
+        // 1. Hitung Subtotal (Hanya harga barang)
+        $subtotal = $keranjangs->sum(function($item) {
             return $item->qty * $item->barang->harga;
         });
+
+        // 2. Tentukan Ongkir berdasarkan Subtotal
+        $batasGratisOngkir = 150000;
+        $tarifOngkir = 10000;
+
+        if ($subtotal >= $batasGratisOngkir) {
+            $ongkir = 0; // Gratis Ongkir
+        } else {
+            $ongkir = $tarifOngkir; // Kena Ongkir Flat
+        }
+
+        // 3. Hitung Grand Total
+        $totalKeseluruhan = $subtotal + $ongkir;
 
         // Cek apakah user punya event yang DISETUJUI
         $eventsDisetujui = PengajuanEvent::where('user_id', Auth::id())
                                         ->where('status', 'disetujui')
                                         ->get();
 
-        return view('pelanggan.checkout.index', compact('keranjangs', 'totalKeseluruhan', 'eventsDisetujui'));
+        // Lempar semua variabel ke View
+        return view('pelanggan.checkout.index', compact(
+            'keranjangs', 'subtotal', 'ongkir', 'batasGratisOngkir', 'totalKeseluruhan', 'eventsDisetujui'
+        ));
     }
 
     // Memproses Data Checkout ke Database
     public function process(Request $request)
     {
         $request->validate([
-            'selected_items'      => 'required|array', // Validasi array ID keranjang yang dibawa dari view
+            'selected_items'      => 'required|array', 
             'selected_items.*'    => 'exists:keranjangs,id',
             'tanggal_pengantaran' => 'required|date|after_or_equal:today',
             'jenis_pesanan'       => 'required|in:reguler,event',
@@ -61,7 +81,7 @@ class CheckoutController extends Controller
             'catatan'             => 'nullable|string'
         ]);
 
-        // Ambil HANYA keranjang yang dipilih berdasarkan ID dari hidden input
+        // Ambil HANYA keranjang yang dipilih
         $keranjangs = Keranjang::with('barang')
             ->where('user_id', Auth::id())
             ->whereIn('id', $request->selected_items)
@@ -71,9 +91,13 @@ class CheckoutController extends Controller
             return redirect()->route('pelanggan.dashboard')->with('error', 'Tidak ada barang yang dipilih untuk checkout.');
         }
 
-        $totalKeseluruhan = $keranjangs->sum(function($item) {
+        // --- LOGIKA ONGKIR (Dihitung ulang di backend demi keamanan) ---
+        $subtotal = $keranjangs->sum(function($item) {
             return $item->qty * $item->barang->harga;
         });
+        
+        $ongkir = $subtotal >= 150000 ? 0 : 10000;
+        $totalKeseluruhan = $subtotal + $ongkir;
 
         $kode_pesanan = 'ORD-' . date('Ymd') . '-' . strtoupper(Str::random(5));
 
@@ -82,7 +106,8 @@ class CheckoutController extends Controller
             'kode_pesanan'        => $kode_pesanan,
             'jenis_pesanan'       => $request->jenis_pesanan,
             'tanggal_pengantaran' => $request->tanggal_pengantaran,
-            'total_harga'         => $totalKeseluruhan,
+            'total_harga'         => $totalKeseluruhan, // Ini sekarang menyimpan Grand Total
+            'ongkir'              => $ongkir,           // Simpan data ongkir ke kolom baru
             'total_dibayar'       => 0,
             'status_pesanan'      => 'menunggu',
             'status_pembayaran'   => 'belum_bayar',
@@ -119,14 +144,11 @@ class CheckoutController extends Controller
             ->whereIn('id', $request->selected_items)
             ->delete();
 
-        // 4. KIRIM WA (MENGAMBIL DARI DATABASE)
+        // 4. KIRIM WA
         try {
             $wa = new FonnteService();
-            
-            // Mencari user dengan role admin (mengambil yang pertama ditemukan)
             $admin = \App\Models\User::where('role', 'admin')->first();
 
-            // Pastikan admin ditemukan dan memiliki nomor HP
             if ($admin && $admin->no_hp) {
                 $nomorAdmin = $admin->no_hp; 
                 
@@ -134,13 +156,15 @@ class CheckoutController extends Controller
                             "Kode: {$pesanan->kode_pesanan}\n" .
                             "Pelanggan: " . Auth::user()->name . "\n" .
                             "Jenis: " . ucfirst($pesanan->jenis_pesanan) . "\n" .
-                            "Total: Rp " . number_format($pesanan->total_harga, 0, ',', '.') . "\n\n" .
+                            "Subtotal: Rp " . number_format($subtotal, 0, ',', '.') . "\n" .
+                            "Ongkir: Rp " . number_format($ongkir, 0, ',', '.') . "\n" .
+                            "Total Tagihan: Rp " . number_format($pesanan->total_harga, 0, ',', '.') . "\n\n" .
                             "Silakan cek dashboard admin untuk proses lebih lanjut.";
                             
                 $wa->sendMessage($nomorAdmin, $pesanAdmin);
             }
         } catch (\Exception $e) {
-            \Log::error('Gagal kirim WA Admin: ' . $e->getMessage());
+            Log::error('Gagal kirim WA Admin: ' . $e->getMessage()); // <-- Sekarang pakai class Log yang sudah di-use
         }
 
         // 5. BARU RETURN

@@ -48,6 +48,7 @@
                             </x-slot>
                         </x-dropdown>
                     </div>
+                    <x-nav-link :href="route('admin.laporan.index')" :active="request()->routeIs('admin.laporan')">Laporan</x-nav-link>
                 </div>
             </div>
 

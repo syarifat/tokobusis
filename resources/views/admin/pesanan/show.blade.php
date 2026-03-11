@@ -67,11 +67,11 @@
                             <label class="block text-xs text-gray-500 mb-1">Ubah Status Pengiriman</label>
                             <div class="flex gap-2">
                                 <select name="status" class="flex-1 text-sm rounded-md border-gray-300 focus:ring-indigo-500">
-                                    <option value="menunggu" {{ $pesanan->status_pesanan == 'menunggu' ? 'selected' : '' }}>Menunggu</option>
-                                    <option value="proses" {{ $pesanan->status_pesanan == 'proses' ? 'selected' : '' }}>Diproses</option>
-                                    <option value="dikirim" {{ $pesanan->status_pesanan == 'dikirim' ? 'selected' : '' }}>Dikirim</option>
-                                    <option value="selesai" {{ $pesanan->status_pesanan == 'selesai' ? 'selected' : '' }}>Selesai</option>
-                                    <option value="dibatalkan" {{ $pesanan->status_pesanan == 'dibatalkan' ? 'selected' : '' }}>Batal</option>
+                                    <option value="menunggu" @if($pesanan->status_pesanan == 'menunggu') selected @endif>Menunggu</option>
+                                    <option value="diproses" @if($pesanan->status_pesanan == 'diproses') selected @endif>Diproses</option>
+                                    <option value="dikirim" @if($pesanan->status_pesanan == 'dikirim') selected @endif>Dikirim</option>
+                                    <option value="selesai" @if($pesanan->status_pesanan == 'selesai') selected @endif>Selesai</option>
+                                    <option value="dibatalkan" @if($pesanan->status_pesanan == 'dibatalkan') selected @endif>Batal</option>
                                 </select>
                                 <button type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-2 rounded-md text-sm font-bold transition">Update</button>
                             </div>

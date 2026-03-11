@@ -119,7 +119,7 @@
                                         @csrf @method('PUT')
                                         <select name="status" onchange="this.form.submit()" class="text-xs rounded border-gray-300 focus:ring-indigo-500 cursor-pointer w-28 text-center font-bold">
                                             <option value="menunggu" {{ $p->status_pesanan == 'menunggu' ? 'selected' : '' }}>Menunggu</option>
-                                            <option value="proses" {{ $p->status_pesanan == 'proses' ? 'selected' : '' }}>Diproses</option>
+                                            <option value="diproses" {{ $p->status_pesanan == 'diproses' ? 'selected' : '' }}>Diproses</option>
                                             <option value="dikirim" {{ $p->status_pesanan == 'dikirim' ? 'selected' : '' }}>Dikirim</option>
                                             <option value="selesai" {{ $p->status_pesanan == 'selesai' ? 'selected' : '' }}>Selesai</option>
                                             <option value="dibatalkan" {{ $p->status_pesanan == 'dibatalkan' ? 'selected' : '' }}>Batal</option>

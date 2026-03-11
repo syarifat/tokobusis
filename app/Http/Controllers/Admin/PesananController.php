@@ -50,9 +50,19 @@ class PesananController extends Controller
         return view('admin.pesanan.show', compact('pesanan'));
     }
 
-    public function updateStatus(Request $request, Pesanan $pesanan)
+    public function updateStatus(Request $request, $id)
     {
-        $pesanan->update(['status_pesanan' => $request->status]);
-        return back()->with('success', 'Status pesanan berhasil diperbarui!');
+        // Pastikan validasinya menggunakan kata 'diproses'
+        $request->validate([
+            'status' => 'required|in:menunggu,diproses,dikirim,selesai,dibatalkan'
+        ]);
+
+        $pesanan = Pesanan::findOrFail($id);
+        
+        $pesanan->update([
+            'status_pesanan' => $request->status
+        ]);
+
+        return redirect()->back()->with('success', 'Status pesanan berhasil diperbarui.');
     }
 }

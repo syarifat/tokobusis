@@ -5,6 +5,9 @@
         </h2>
     </x-slot>
 
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             
@@ -51,10 +54,55 @@
                           }
                       },
                       init() {
-                          // Otomatis minta lokasi saat halaman dimuat jika defaultnya 'diantar'
-                          if(this.pengiriman === 'diantar') this.getLocation();
+                          // 1. Setup Peta
+                          let defaultLat = -7.0628; 
+                          let defaultLng = 112.4301;
                           
-                          // Pantau perubahan: jika klik 'diantar' dan belum ada koordinat, cari lokasi
+                          const map = L.map('map').setView([defaultLat, defaultLng], 13);
+                          
+                          L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                              attribution: '&copy; OpenStreetMap'
+                          }).addTo(map);
+
+                          // 2. Setup Pin/Marker
+                          const marker = L.marker([defaultLat, defaultLng], {
+                              draggable: true
+                          }).addTo(map);
+
+                          // 3. Update Alpine State saat marker digeser manual
+                          marker.on('dragend', (e) => {
+                              let pos = e.target.getLatLng();
+                              this.latitude = pos.lat;
+                              this.longitude = pos.lng;
+                              this.locationSuccess = true;
+                          });
+
+                          // 4. Update Alpine State saat peta di-klik
+                          map.on('click', (e) => {
+                              marker.setLatLng(e.latlng);
+                              this.latitude = e.latlng.lat;
+                              this.longitude = e.latlng.lng;
+                              this.locationSuccess = true;
+                          });
+
+                          // 5. Sinkronkan jika 'latitude' berubah (misal karena tombol GPS diklik)
+                          this.$watch('latitude', (val) => {
+                              if(val) {
+                                  let newPos = new L.LatLng(this.latitude, this.longitude);
+                                  marker.setLatLng(newPos);
+                                  map.setView(newPos, 16); // Auto-zoom mendekat
+                                  
+                                  // Workaround untuk bug Leaflet di dalam elemen x-show yang disembunyikan
+                                  setTimeout(function(){ map.invalidateSize()}, 400);
+                              }
+                          });
+
+                          // Otomatis minta lokasi saat halaman dimuat jika defaultnya 'diantar'
+                          if(this.pengiriman === 'diantar') {
+                              this.getLocation();
+                          }
+                          
+                          // Pantau perubahan mode pengiriman
                           this.$watch('pengiriman', value => {
                               if(value === 'diantar' && !this.latitude) {
                                   this.getLocation();
@@ -169,24 +217,32 @@
                             
                             <div class="mb-4" x-show="pengiriman == 'diantar'">
                                 <label class="block text-gray-700 text-sm font-bold mb-2">Alamat Pengiriman</label>
-                                <textarea class="bg-gray-100 border-gray-300 rounded w-full py-2 px-3 text-gray-700 cursor-not-allowed" rows="2" readonly>{{ Auth::user()->alamat }}</textarea>
+                                <textarea class="bg-gray-100 border-gray-300 rounded w-full py-2 px-3 text-gray-700 cursor-not-allowed mb-3" rows="2" readonly>{{ Auth::user()->alamat }}</textarea>
                                 
-                                <div class="mt-2 p-3 bg-blue-50 border border-blue-100 rounded text-xs">
-                                    <div class="flex items-center justify-between">
-                                        <span class="font-bold text-blue-800">Pin Titik Lokasi Antar (Maps)</span>
-                                        <button type="button" @click="getLocation()" class="text-blue-600 underline hover:text-blue-800 focus:outline-none">Deteksi Ulang</button>
+                                <div class="border rounded-lg overflow-hidden border-gray-200">
+                                    <div class="bg-gray-50 px-4 py-2 border-b flex justify-between items-center">
+                                        <span class="text-xs font-bold text-gray-600 uppercase">Pastikan Titik Lokasi Anda</span>
+                                        <button type="button" @click="getLocation()" class="text-xs bg-indigo-50 text-indigo-600 px-2 py-1 rounded border border-indigo-200 hover:bg-indigo-600 hover:text-white transition">
+                                            Gunakan GPS Saya
+                                        </button>
                                     </div>
-                                    <div x-show="locating" class="text-blue-600 mt-1 font-semibold flex items-center">
-                                        <svg class="animate-spin h-3 w-3 mr-1" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Sedang mendeteksi...
+
+                                    <div x-show="locating" class="bg-blue-100 text-blue-700 p-2 text-xs text-center font-bold flex items-center justify-center">
+                                        <svg class="animate-spin h-3 w-3 mr-2" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> 
+                                        Sedang mencari sinyal satelit GPS...
                                     </div>
-                                    <div x-show="locationSuccess" class="text-green-600 font-bold mt-1">
-                                        ✅ Titik lokasi berhasil diamankan.
+                                    <div x-show="locationError" class="bg-red-100 text-red-700 p-2 text-xs text-center font-bold" x-text="locationError"></div>
+
+                                    <div id="map" style="height: 300px;" class="z-0" wire:ignore></div>
+
+                                    <div class="p-3 bg-blue-50 text-[10px] text-blue-700 flex justify-between items-center">
+                                        <p>💡 <b>Tips:</b> Geser penanda di peta jika titik GPS kurang akurat.</p>
+                                        <div x-show="locationSuccess" class="text-green-600 font-bold">✅ Titik Terkunci.</div>
                                     </div>
-                                    <div x-show="locationError" class="text-red-600 font-bold mt-1" x-text="locationError"></div>
                                 </div>
                             </div>
 
-                            <div class="mb-4">
+                            <div class="mb-4 mt-6">
                                 <label class="block text-gray-700 text-sm font-bold mb-2" x-text="pengiriman == 'diantar' ? 'Tanggal Pengantaran Barang' : 'Tanggal Pengambilan ke Toko'"></label>
                                 <input type="date" name="tanggal_pengantaran" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 focus:outline-none focus:shadow-outline" required min="{{ date('Y-m-d') }}">
                             </div>
@@ -249,12 +305,16 @@
                                 </div>
                             </div>
 
-                            <button type="submit" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-4 rounded-lg shadow transition duration-200 flex justify-center items-center">
-                                Buat Pesanan
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 ml-2" viewBox="0 0 20 20" fill="currentColor">
+                            <button type="submit" 
+                                    class="w-full font-bold py-3 px-4 rounded-lg shadow transition duration-200 flex justify-center items-center"
+                                    :class="(pengiriman == 'diantar' && !locationSuccess) ? 'bg-gray-400 text-gray-200 cursor-not-allowed' : 'bg-green-600 hover:bg-green-700 text-white'"
+                                    :disabled="pengiriman == 'diantar' && !locationSuccess">
+                                <span x-text="(pengiriman == 'diantar' && !locationSuccess) ? 'Menunggu Titik Lokasi...' : 'Buat Pesanan'"></span>
+                                <svg x-show="pengiriman == 'ambil_sendiri' || locationSuccess" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 ml-2" viewBox="0 0 20 20" fill="currentColor">
                                     <path fill-rule="evenodd" d="M12.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-2.293-2.293a1 1 0 010-1.414z" clip-rule="evenodd" />
                                 </svg>
                             </button>
+
                         </div>
                     </div>
                 </div>

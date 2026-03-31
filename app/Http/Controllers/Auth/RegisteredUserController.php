@@ -32,26 +32,22 @@ class RegisteredUserController extends Controller
         $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User::class],
-            'password' => ['required', 'confirmed', Rules\Password::defaults()],
-            // Tambahkan validasi untuk no_hp dan alamat
-            'no_hp' => ['required', 'string', 'max:20'],
-            'alamat' => ['required', 'string'],
+            'password' => ['required', 'confirmed', \Illuminate\Validation\Rules\Password::defaults()],
         ]);
 
+        // Tambahkan default role 'pelanggan' saat create
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
-            'password' => Hash::make($request->password),
-            // Tambahkan input ini ke database
-            'no_hp' => $request->no_hp,
-            'alamat' => $request->alamat,
-            'role' => 'pelanggan', // Default role saat mendaftar adalah pelanggan
+            'password' => \Illuminate\Support\Facades\Hash::make($request->password),
+            'role' => 'pelanggan',
         ]);
 
-        event(new Registered($user));
+        event(new \Illuminate\Auth\Events\Registered($user));
 
-        Auth::login($user);
+        \Illuminate\Support\Facades\Auth::login($user);
 
-        return redirect('/pelanggan/dashboard');
+        // UBAH REDIRECT-NYA KE DASHBOARD PELANGGAN
+        return redirect()->route('pelanggan.dashboard');
     }
 }

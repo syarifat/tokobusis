@@ -78,8 +78,10 @@ class CheckoutController extends Controller
             'tanggal_pengantaran' => 'required|date|after_or_equal:today',
             'jenis_pesanan'       => 'required|in:reguler,event',
             'event_id'            => 'required_if:jenis_pesanan,event',
-            'metode_pengiriman'   => 'required|in:diantar,ambil_sendiri', // <-- Validasi Baru
-            'tipe_pembayaran'     => 'required|in:transfer,cash',         // <-- Validasi Baru
+            'metode_pengiriman'   => 'required|in:diantar,ambil_sendiri',
+            'tipe_pembayaran'     => 'required|in:transfer,cash',
+            'latitude'            => 'nullable|string', // Validasi Maps Baru
+            'longitude'           => 'nullable|string', // Validasi Maps Baru
             'catatan'             => 'nullable|string'
         ]);
 
@@ -96,11 +98,10 @@ class CheckoutController extends Controller
             return $item->qty * $item->barang->harga;
         });
         
-        // --- LOGIKA ONGKIR BARU ---
         if ($request->metode_pengiriman == 'ambil_sendiri') {
-            $ongkir = 0; // Kalo ambil ke toko, ongkir gratis mutlak!
+            $ongkir = 0;
         } else {
-            $ongkir = $subtotal >= 150000 ? 0 : 10000; // Kalo diantar, cek subtotal
+            $ongkir = $subtotal >= 150000 ? 0 : 10000;
         }
         
         $totalKeseluruhan = $subtotal + $ongkir;
@@ -114,8 +115,10 @@ class CheckoutController extends Controller
             'tanggal_pengantaran' => $request->tanggal_pengantaran,
             'total_harga'         => $totalKeseluruhan, 
             'ongkir'              => $ongkir,           
-            'metode_pengiriman'   => $request->metode_pengiriman, // <-- Simpan ke DB
-            'tipe_pembayaran'     => $request->tipe_pembayaran,   // <-- Simpan ke DB
+            'metode_pengiriman'   => $request->metode_pengiriman,
+            'tipe_pembayaran'     => $request->tipe_pembayaran,
+            'latitude'            => $request->latitude,   // Simpan ke DB
+            'longitude'           => $request->longitude,  // Simpan ke DB
             'total_dibayar'       => 0,
             'status_pesanan'      => 'menunggu',
             'status_pembayaran'   => 'belum_bayar',
@@ -152,7 +155,7 @@ class CheckoutController extends Controller
             ->whereIn('id', $request->selected_items)
             ->delete();
 
-        // 4. KIRIM WA
+        // 4. KIRIM WA DENGAN LINK MAPS
         try {
             $wa = new FonnteService();
             $admin = \App\Models\User::where('role', 'admin')->first();
@@ -163,11 +166,17 @@ class CheckoutController extends Controller
                 $pengiriman = $request->metode_pengiriman == 'ambil_sendiri' ? '🏪 Ambil Sendiri' : '🚚 Diantar Kurir';
                 $pembayaran = $request->tipe_pembayaran == 'cash' ? '💵 Tunai (Cash)' : '💳 Transfer/Online';
 
+                // Format URL API Google Maps Search yang universal (Bisa dibuka di Web / Aplikasi Maps HP)
+                $linkMaps = ($pesanan->latitude && $pesanan->longitude) 
+                            ? "https://www.google.com/maps/search/?api=1&query={$pesanan->latitude},{$pesanan->longitude}" 
+                            : "- (Tidak disertakan / Ambil Sendiri)";
+
                 $pesanAdmin = "🔔 *PESANAN BARU MASUK*\n\n" .
                             "Kode: {$pesanan->kode_pesanan}\n" .
                             "Pelanggan: " . Auth::user()->name . "\n" .
                             "Jenis: " . ucfirst($pesanan->jenis_pesanan) . "\n" .
                             "Pengiriman: {$pengiriman}\n" .
+                            "📍 Lokasi Maps: {$linkMaps}\n" .
                             "Pembayaran: {$pembayaran}\n" .
                             "Subtotal: Rp " . number_format($subtotal, 0, ',', '.') . "\n" .
                             "Ongkir: Rp " . number_format($ongkir, 0, ',', '.') . "\n" .
@@ -177,7 +186,7 @@ class CheckoutController extends Controller
                 $wa->sendMessage($nomorAdmin, $pesanAdmin);
             }
         } catch (\Exception $e) {
-            Log::error('Gagal kirim WA Admin: ' . $e->getMessage()); // <-- Sekarang pakai class Log yang sudah di-use
+            \Log::error('Gagal kirim WA Admin: ' . $e->getMessage()); 
         }
 
         // 5. BARU RETURN

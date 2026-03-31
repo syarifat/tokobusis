@@ -25,6 +25,8 @@ class Pesanan extends Model
         'status_pesanan',
         'status_pembayaran',
         'catatan',
+        'longitude',
+        'latitude',
     ];
 
     protected $casts = [

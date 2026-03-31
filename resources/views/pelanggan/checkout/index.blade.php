@@ -16,11 +16,50 @@
                       subtotal: {{ $subtotal }},
                       ongkirDasar: {{ $ongkir }},
                       batasGratis: {{ $batasGratisOngkir }},
+                      latitude: '',
+                      longitude: '',
+                      locating: false,
+                      locationSuccess: false,
+                      locationError: '',
                       get ongkirAktif() {
                           return this.pengiriman === 'ambil_sendiri' ? 0 : this.ongkirDasar;
                       },
                       get grandTotal() {
                           return this.subtotal + this.ongkirAktif;
+                      },
+                      getLocation() {
+                          this.locating = true;
+                          this.locationError = '';
+                          if (navigator.geolocation) {
+                              navigator.geolocation.getCurrentPosition(
+                                  (position) => {
+                                      this.latitude = position.coords.latitude;
+                                      this.longitude = position.coords.longitude;
+                                      this.locating = false;
+                                      this.locationSuccess = true;
+                                  },
+                                  (error) => {
+                                      this.locating = false;
+                                      this.locationSuccess = false;
+                                      this.locationError = 'Gagal mengambil lokasi. Izinkan akses GPS di browser Anda.';
+                                  },
+                                  { enableHighAccuracy: true }
+                              );
+                          } else {
+                              this.locating = false;
+                              this.locationError = 'Browser tidak mendukung fitur lokasi.';
+                          }
+                      },
+                      init() {
+                          // Otomatis minta lokasi saat halaman dimuat jika defaultnya 'diantar'
+                          if(this.pengiriman === 'diantar') this.getLocation();
+                          
+                          // Pantau perubahan: jika klik 'diantar' dan belum ada koordinat, cari lokasi
+                          this.$watch('pengiriman', value => {
+                              if(value === 'diantar' && !this.latitude) {
+                                  this.getLocation();
+                              }
+                          });
                       }
                   }">
                 
@@ -29,6 +68,9 @@
                 @foreach($keranjangs as $item)
                     <input type="hidden" name="selected_items[]" value="{{ $item->id }}">
                 @endforeach
+
+                <input type="hidden" name="latitude" x-model="latitude">
+                <input type="hidden" name="longitude" x-model="longitude">
 
                 <div class="md:col-span-2 space-y-6">
                     
@@ -128,6 +170,20 @@
                             <div class="mb-4" x-show="pengiriman == 'diantar'">
                                 <label class="block text-gray-700 text-sm font-bold mb-2">Alamat Pengiriman</label>
                                 <textarea class="bg-gray-100 border-gray-300 rounded w-full py-2 px-3 text-gray-700 cursor-not-allowed" rows="2" readonly>{{ Auth::user()->alamat }}</textarea>
+                                
+                                <div class="mt-2 p-3 bg-blue-50 border border-blue-100 rounded text-xs">
+                                    <div class="flex items-center justify-between">
+                                        <span class="font-bold text-blue-800">Pin Titik Lokasi Antar (Maps)</span>
+                                        <button type="button" @click="getLocation()" class="text-blue-600 underline hover:text-blue-800 focus:outline-none">Deteksi Ulang</button>
+                                    </div>
+                                    <div x-show="locating" class="text-blue-600 mt-1 font-semibold flex items-center">
+                                        <svg class="animate-spin h-3 w-3 mr-1" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Sedang mendeteksi...
+                                    </div>
+                                    <div x-show="locationSuccess" class="text-green-600 font-bold mt-1">
+                                        ✅ Titik lokasi berhasil diamankan.
+                                    </div>
+                                    <div x-show="locationError" class="text-red-600 font-bold mt-1" x-text="locationError"></div>
+                                </div>
                             </div>
 
                             <div class="mb-4">

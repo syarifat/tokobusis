@@ -61,6 +61,7 @@
                             <tr>
                                 <th class="px-6 py-3 border-b-2 border-gray-200 bg-gray-50 text-left text-xs font-semibold text-gray-600 uppercase">Tanggal</th>
                                 <th class="px-6 py-3 border-b-2 border-gray-200 bg-gray-50 text-left text-xs font-semibold text-gray-600 uppercase">Kode & Pelanggan</th>
+                                <th class="px-6 py-3 border-b-2 border-gray-200 bg-gray-50 text-left text-xs font-semibold text-gray-600 uppercase">Metode Transaksi</th>
                                 <th class="px-6 py-3 border-b-2 border-gray-200 bg-gray-50 text-right text-xs font-semibold text-gray-600 uppercase">Nilai Pesanan</th>
                                 <th class="px-6 py-3 border-b-2 border-gray-200 bg-gray-50 text-right text-xs font-semibold text-gray-600 uppercase">Telah Dibayar</th>
                                 <th class="px-6 py-3 border-b-2 border-gray-200 bg-gray-50 text-center text-xs font-semibold text-gray-600 uppercase">Status</th>
@@ -76,6 +77,12 @@
                                     <a href="{{ route('admin.pesanan.show', $p->id) }}" class="font-mono font-bold text-indigo-600 hover:underline">{{ $p->kode_pesanan }}</a>
                                     <p class="text-gray-500 text-xs mt-1">{{ $p->user->name }} ({{ strtoupper($p->jenis_pesanan) }})</p>
                                 </td>
+                                
+                                <td class="px-6 py-4 text-sm">
+                                    <p class="font-bold text-gray-800 text-xs">{{ $p->metode_pengiriman == 'ambil_sendiri' ? '🏪 Ambil Sendiri' : '🚚 Diantar' }}</p>
+                                    <p class="text-gray-500 text-xs mt-1">{{ $p->tipe_pembayaran == 'cash' ? '💵 Tunai' : '💳 Transfer' }}</p>
+                                </td>
+
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-right font-bold text-gray-900">
                                     Rp {{ number_format($p->total_harga, 0, ',', '.') }}
                                 </td>
@@ -90,7 +97,7 @@
                             </tr>
                             @empty
                             <tr>
-                                <td colspan="5" class="px-6 py-10 text-center text-gray-500">
+                                <td colspan="6" class="px-6 py-10 text-center text-gray-500">
                                     Tidak ada transaksi pada periode ini.
                                 </td>
                             </tr>

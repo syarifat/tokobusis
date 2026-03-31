@@ -70,18 +70,29 @@
                                     </td>
 
                                     <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm">
-                                        @if($p->jenis_pesanan == 'event')
-                                            <span class="px-2 py-1 rounded-full text-[10px] font-semibold bg-purple-100 text-purple-800 uppercase">
-                                                {{ $p->jenis_pesanan }}
-                                            </span>
-                                            <p class="text-[10px] text-gray-500 font-bold mt-1.5 line-clamp-2" title="{{ $p->nama_event }}">
-                                                - {{ $p->nama_event }}
+                                        <div class="mb-2">
+                                            @if($p->jenis_pesanan == 'event')
+                                                <span class="px-2 py-1 rounded-full text-[10px] font-semibold bg-purple-100 text-purple-800 uppercase">
+                                                    {{ $p->jenis_pesanan }}
+                                                </span>
+                                                <p class="text-[10px] text-gray-500 font-bold mt-1.5 line-clamp-2" title="{{ $p->nama_event }}">
+                                                    - {{ $p->nama_event }}
+                                                </p>
+                                            @else
+                                                <span class="px-2 py-1 rounded-full text-[10px] font-semibold bg-blue-100 text-blue-800 uppercase">
+                                                    {{ $p->jenis_pesanan }}
+                                                </span>
+                                            @endif
+                                        </div>
+                                        
+                                        <div class="mt-2 pt-2 border-t border-gray-100">
+                                            <p class="text-[10px] font-bold {{ $p->metode_pengiriman == 'ambil_sendiri' ? 'text-orange-600' : 'text-blue-600' }}">
+                                                {{ $p->metode_pengiriman == 'ambil_sendiri' ? '🏪 Ambil Sendiri' : '🚚 Diantar' }}
                                             </p>
-                                        @else
-                                            <span class="px-2 py-1 rounded-full text-[10px] font-semibold bg-blue-100 text-blue-800 uppercase">
-                                                {{ $p->jenis_pesanan }}
-                                            </span>
-                                        @endif
+                                            <p class="text-[10px] text-gray-500 mt-0.5">
+                                                Via {{ $p->tipe_pembayaran == 'cash' ? 'Tunai (Cash)' : 'Transfer' }}
+                                            </p>
+                                        </div>
                                     </td>
 
                                     <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm font-bold">

@@ -160,10 +160,15 @@ class CheckoutController extends Controller
             if ($admin && $admin->no_hp) {
                 $nomorAdmin = $admin->no_hp; 
                 
+                $pengiriman = $request->metode_pengiriman == 'ambil_sendiri' ? '🏪 Ambil Sendiri' : '🚚 Diantar Kurir';
+                $pembayaran = $request->tipe_pembayaran == 'cash' ? '💵 Tunai (Cash)' : '💳 Transfer/Online';
+
                 $pesanAdmin = "🔔 *PESANAN BARU MASUK*\n\n" .
                             "Kode: {$pesanan->kode_pesanan}\n" .
                             "Pelanggan: " . Auth::user()->name . "\n" .
                             "Jenis: " . ucfirst($pesanan->jenis_pesanan) . "\n" .
+                            "Pengiriman: {$pengiriman}\n" .
+                            "Pembayaran: {$pembayaran}\n" .
                             "Subtotal: Rp " . number_format($subtotal, 0, ',', '.') . "\n" .
                             "Ongkir: Rp " . number_format($ongkir, 0, ',', '.') . "\n" .
                             "Total Tagihan: Rp " . number_format($pesanan->total_harga, 0, ',', '.') . "\n\n" .

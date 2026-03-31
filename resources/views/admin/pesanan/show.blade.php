@@ -34,11 +34,11 @@
                     </div>
 
                     <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-                        <h3 class="text-lg font-bold text-gray-900 border-b pb-2 mb-4">Ringkasan Pembayaran</h3>
+                        <h3 class="text-lg font-bold text-gray-900 border-b pb-2 mb-4">Ringkasan Tagihan</h3>
                         
                         <div class="space-y-3 text-sm mb-6">
                             <div class="flex justify-between">
-                                <span class="text-gray-500">Total Harga</span>
+                                <span class="text-gray-500">Total Tagihan</span>
                                 <span class="font-bold">Rp {{ number_format($pesanan->total_harga, 0, ',', '.') }}</span>
                             </div>
                             <div class="flex justify-between">
@@ -51,12 +51,23 @@
                             </div>
                         </div>
 
+                        <div class="grid grid-cols-2 gap-2 text-center text-xs font-bold mb-2">
+                            <div class="p-2 rounded-lg border {{ $pesanan->metode_pengiriman == 'ambil_sendiri' ? 'bg-orange-50 border-orange-200 text-orange-700' : 'bg-blue-50 border-blue-200 text-blue-700' }}">
+                                <p class="text-[10px] text-gray-500 font-normal uppercase mb-1">Pengiriman</p>
+                                {{ $pesanan->metode_pengiriman == 'ambil_sendiri' ? 'Ambil Sendiri' : 'Diantar Kurir' }}
+                            </div>
+                            <div class="p-2 rounded-lg border {{ $pesanan->tipe_pembayaran == 'cash' ? 'bg-green-50 border-green-200 text-green-700' : 'bg-indigo-50 border-indigo-200 text-indigo-700' }}">
+                                <p class="text-[10px] text-gray-500 font-normal uppercase mb-1">Tipe Bayar</p>
+                                {{ $pesanan->tipe_pembayaran == 'cash' ? 'Tunai (Cash)' : 'Transfer / Midtrans' }}
+                            </div>
+                        </div>
+
                         <div class="grid grid-cols-2 gap-2 text-center text-xs font-bold mb-4">
                             <div class="p-2 rounded-lg border {{ $pesanan->status_pembayaran == 'lunas' ? 'bg-green-50 border-green-200 text-green-700' : 'bg-orange-50 border-orange-200 text-orange-700' }}">
                                 <p class="text-[10px] text-gray-500 font-normal uppercase mb-1">Status Bayar</p>
                                 {{ strtoupper($pesanan->status_pembayaran) }}
                             </div>
-                            <div class="p-2 rounded-lg border {{ $pesanan->jenis_pesanan == 'event' ? 'bg-purple-50 border-purple-200 text-purple-700' : 'bg-blue-50 border-blue-200 text-blue-700' }}">
+                            <div class="p-2 rounded-lg border {{ $pesanan->jenis_pesanan == 'event' ? 'bg-purple-50 border-purple-200 text-purple-700' : 'bg-gray-50 border-gray-200 text-gray-700' }}">
                                 <p class="text-[10px] text-gray-500 font-normal uppercase mb-1">Jenis Pesanan</p>
                                 {{ strtoupper($pesanan->jenis_pesanan) }}
                             </div>
@@ -88,13 +99,20 @@
                         </div>
                     </div>
                     @endif
+
+                    @if($pesanan->catatan)
+                    <div class="bg-yellow-50 rounded-xl border border-yellow-200 p-4">
+                        <p class="text-xs font-bold text-yellow-800 uppercase mb-1">Catatan dari Pelanggan:</p>
+                        <p class="text-sm text-yellow-900 italic">"{{ $pesanan->catatan }}"</p>
+                    </div>
+                    @endif
                 </div>
 
                 <div class="md:col-span-2 space-y-6">
                     <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
                         <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50">
                             <h3 class="text-lg font-bold text-gray-900">Rincian Barang</h3>
-                            <span class="text-sm text-gray-500 font-semibold">Tgl Antar: {{ \Carbon\Carbon::parse($pesanan->tanggal_pengantaran)->format('d/m/Y') }}</span>
+                            <span class="text-sm text-gray-500 font-semibold">Tgl Antar/Ambil: {{ \Carbon\Carbon::parse($pesanan->tanggal_pengantaran)->format('d/m/Y') }}</span>
                         </div>
                         <div class="p-6">
                             <div class="space-y-4">
@@ -119,6 +137,19 @@
                                 </div>
                                 @endforeach
                             </div>
+
+                            <div class="mt-4 pt-4 border-t space-y-2 text-sm">
+                                <div class="flex justify-between text-gray-600">
+                                    <span>Subtotal Barang</span>
+                                    <span>Rp {{ number_format($pesanan->total_harga - $pesanan->ongkir, 0, ',', '.') }}</span>
+                                </div>
+                                <div class="flex justify-between text-gray-600">
+                                    <span>Ongkos Kirim</span>
+                                    <span class="{{ $pesanan->ongkir == 0 ? 'text-green-600 font-bold' : '' }}">
+                                        {{ $pesanan->ongkir == 0 ? 'Gratis' : 'Rp ' . number_format($pesanan->ongkir, 0, ',', '.') }}
+                                    </span>
+                                </div>
+                            </div>
                         </div>
                         <div class="bg-gray-50 px-6 py-4 border-t border-gray-100 flex justify-between items-center">
                             <span class="text-gray-500 font-bold uppercase text-sm">Total Keseluruhan</span>
@@ -128,40 +159,40 @@
 
                     <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
                         <div class="px-6 py-4 border-b border-gray-100 bg-gray-50">
-                            <h3 class="text-lg font-bold text-gray-900">Riwayat Pembayaran Midtrans</h3>
+                            <h3 class="text-lg font-bold text-gray-900">Riwayat Pembayaran via Midtrans</h3>
                         </div>
                         <div class="p-6">
-                            @if($pesanan->pembayarans->count() > 0)
-                                <div class="space-y-4">
-                                    @foreach($pesanan->pembayarans as $bayar)
-                                    <div class="flex justify-between items-center border-l-4 {{ $bayar->status_transaksi == 'sukses' ? 'border-green-500' : 'border-yellow-400' }} pl-4 py-2 bg-gray-50 rounded-r-lg">
-                                        <div>
-                                            <p class="font-bold text-gray-800 text-sm">Rp {{ number_format($bayar->nominal_bayar, 0, ',', '.') }}</p>
-                                            <p class="text-xs text-gray-500 mt-0.5">Kode: {{ $bayar->kode_pembayaran }}</p>
-                                            <p class="text-[10px] text-gray-400 mt-1">{{ $bayar->waktu_bayar ? \Carbon\Carbon::parse($bayar->waktu_bayar)->format('d M Y, H:i') : 'Menunggu pembayaran' }} • {{ strtoupper($bayar->metode_pembayaran ?? 'Online') }}</p>
-                                        </div>
-                                        <div>
-                                            <span class="px-2.5 py-1 rounded-full text-[10px] font-black uppercase {{ $bayar->status_transaksi == 'sukses' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700' }}">
-                                                {{ $bayar->status_transaksi }}
-                                            </span>
-                                        </div>
-                                    </div>
-                                    @endforeach
+                            @if($pesanan->tipe_pembayaran == 'cash')
+                                <div class="text-center py-6 text-gray-500 text-sm">
+                                    <p class="font-bold">Transaksi ini menggunakan metode Tunai (Cash).</p>
+                                    <p class="text-xs mt-1">Pembayaran tidak dicatat secara otomatis oleh Midtrans.</p>
                                 </div>
                             @else
-                                <div class="text-center py-6 text-gray-400 text-sm">
-                                    <p>Belum ada riwayat pembayaran untuk pesanan ini.</p>
-                                </div>
+                                @if($pesanan->pembayarans->count() > 0)
+                                    <div class="space-y-4">
+                                        @foreach($pesanan->pembayarans as $bayar)
+                                        <div class="flex justify-between items-center border-l-4 {{ $bayar->status_transaksi == 'sukses' ? 'border-green-500' : 'border-yellow-400' }} pl-4 py-2 bg-gray-50 rounded-r-lg">
+                                            <div>
+                                                <p class="font-bold text-gray-800 text-sm">Rp {{ number_format($bayar->nominal_bayar, 0, ',', '.') }}</p>
+                                                <p class="text-xs text-gray-500 mt-0.5">Kode: {{ $bayar->kode_pembayaran }}</p>
+                                                <p class="text-[10px] text-gray-400 mt-1">{{ $bayar->waktu_bayar ? \Carbon\Carbon::parse($bayar->waktu_bayar)->format('d M Y, H:i') : 'Menunggu pembayaran' }} • {{ strtoupper($bayar->metode_pembayaran ?? 'Online') }}</p>
+                                            </div>
+                                            <div>
+                                                <span class="px-2.5 py-1 rounded-full text-[10px] font-black uppercase {{ $bayar->status_transaksi == 'sukses' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700' }}">
+                                                    {{ $bayar->status_transaksi }}
+                                                </span>
+                                            </div>
+                                        </div>
+                                        @endforeach
+                                    </div>
+                                @else
+                                    <div class="text-center py-6 text-gray-400 text-sm">
+                                        <p>Belum ada riwayat pembayaran transfer/online untuk pesanan ini.</p>
+                                    </div>
+                                @endif
                             @endif
                         </div>
                     </div>
-
-                    @if($pesanan->catatan)
-                    <div class="bg-yellow-50 rounded-xl border border-yellow-200 p-4">
-                        <p class="text-xs font-bold text-yellow-800 uppercase mb-1">Catatan dari Pelanggan:</p>
-                        <p class="text-sm text-yellow-900 italic">"{{ $pesanan->catatan }}"</p>
-                    </div>
-                    @endif
 
                 </div>
             </div>

@@ -3,19 +3,20 @@
 <head>
     <title>Laporan Penjualan</title>
     <style>
-        body { font-family: sans-serif; font-size: 12px; }
+        body { font-family: sans-serif; font-size: 11px; } /* Font dikecilkan sedikit agar tabel muat */
         .header { text-align: center; margin-bottom: 20px; }
         .header h2 { margin: 0; font-size: 20px; color: #333; }
         .header p { margin: 5px 0; color: #666; }
         
         .summary { width: 100%; margin-bottom: 20px; border-collapse: collapse; }
         .summary td { padding: 10px; border: 1px solid #ddd; text-align: center; background: #f9f9f9; }
-        .summary h3 { margin: 0 0 5px 0; font-size: 18px; color: #333; }
-        .summary p { margin: 0; font-size: 11px; color: #666; text-transform: uppercase; }
+        .summary h3 { margin: 0 0 5px 0; font-size: 16px; color: #333; }
+        .summary p { margin: 0; font-size: 10px; color: #666; text-transform: uppercase; }
 
         table.data { width: 100%; border-collapse: collapse; margin-top: 10px; }
-        table.data th, table.data td { border: 1px solid #333; padding: 8px; }
-        table.data th { background-color: #f2f2f2; text-align: center; }
+        table.data th, table.data td { border: 1px solid #333; padding: 6px; }
+        table.data th { background-color: #f2f2f2; text-align: center; font-size: 10px; }
+        table.data td { font-size: 10px; }
         table.data .text-right { text-align: right; }
         table.data .text-center { text-align: center; }
     </style>
@@ -55,8 +56,10 @@
                 <th>No</th>
                 <th>Tanggal</th>
                 <th>Kode Pesanan</th>
-                <th>Nama Pelanggan</th>
+                <th>Pelanggan</th>
                 <th>Jenis</th>
+                <th>Pengiriman</th>
+                <th>Bayar</th>
                 <th>Status Bayar</th>
                 <th>Total Tagihan</th>
                 <th>Dibayar</th>
@@ -66,17 +69,21 @@
             @forelse($pesanans as $index => $p)
             <tr>
                 <td class="text-center">{{ $index + 1 }}</td>
-                <td class="text-center">{{ $p->created_at->format('d/m/Y') }}</td>
+                <td class="text-center">{{ $p->created_at->format('d/m/y') }}</td>
                 <td class="text-center">{{ $p->kode_pesanan }}</td>
                 <td>{{ $p->user->name }}</td>
                 <td class="text-center">{{ strtoupper($p->jenis_pesanan) }}</td>
+                
+                <td class="text-center">{{ $p->metode_pengiriman == 'ambil_sendiri' ? 'Ambil Toko' : 'Diantar' }}</td>
+                <td class="text-center">{{ $p->tipe_pembayaran == 'cash' ? 'Tunai' : 'Transfer' }}</td>
+                
                 <td class="text-center">{{ strtoupper(str_replace('_', ' ', $p->status_pembayaran)) }}</td>
                 <td class="text-right">Rp {{ number_format($p->total_harga, 0, ',', '.') }}</td>
                 <td class="text-right">Rp {{ number_format($p->total_dibayar, 0, ',', '.') }}</td>
             </tr>
             @empty
             <tr>
-                <td colspan="8" class="text-center" style="padding: 20px;">Tidak ada transaksi pada periode ini.</td>
+                <td colspan="10" class="text-center" style="padding: 20px;">Tidak ada transaksi pada periode ini.</td>
             </tr>
             @endforelse
         </tbody>

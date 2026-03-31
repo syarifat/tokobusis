@@ -82,12 +82,23 @@
                                 </td>
                                 
                                 <td class="px-5 py-5 border-b border-gray-200 text-sm text-center">
-                                    <span class="px-2 py-1 rounded text-white text-[10px] font-bold {{ $p->jenis_pesanan == 'event' ? 'bg-purple-500' : 'bg-blue-500' }}">
-                                        {{ strtoupper($p->jenis_pesanan) }}
-                                    </span>
-                                    @if($p->nama_event)
-                                        <p class="text-[9px] text-gray-500 mt-1 uppercase truncate w-20 mx-auto" title="{{ $p->nama_event }}">{{ $p->nama_event }}</p>
-                                    @endif
+                                    <div class="mb-2">
+                                        <span class="px-2 py-1 rounded text-white text-[10px] font-bold {{ $p->jenis_pesanan == 'event' ? 'bg-purple-500' : 'bg-blue-500' }}">
+                                            {{ strtoupper($p->jenis_pesanan) }}
+                                        </span>
+                                        @if($p->nama_event)
+                                            <p class="text-[9px] text-gray-500 mt-1 uppercase truncate w-20 mx-auto" title="{{ $p->nama_event }}">{{ $p->nama_event }}</p>
+                                        @endif
+                                    </div>
+
+                                    <div class="mt-2 pt-2 border-t border-gray-100 inline-block text-left w-full text-center">
+                                        <p class="text-[10px] font-bold {{ $p->metode_pengiriman == 'ambil_sendiri' ? 'text-orange-600' : 'text-blue-600' }}">
+                                            {{ $p->metode_pengiriman == 'ambil_sendiri' ? '🏪 Ambil Sendiri' : '🚚 Diantar' }}
+                                        </p>
+                                        <p class="text-[10px] text-gray-500 mt-0.5">
+                                            {{ $p->tipe_pembayaran == 'cash' ? '💵 Tunai' : '💳 Transfer' }}
+                                        </p>
+                                    </div>
                                 </td>
                                 
                                 <td class="px-5 py-5 border-b border-gray-200 text-sm text-center">

@@ -16,6 +16,7 @@
                 
                 <div class="md:col-span-2 space-y-6">
                     <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-6">
+                        
                         <div class="flex justify-between items-start border-b pb-4 mb-4">
                             <div>
                                 <p class="text-sm text-gray-500">Status Pesanan</p>
@@ -24,19 +25,42 @@
                                 </span>
                             </div>
                             <div class="text-right">
-                                <p class="text-sm text-gray-500">Jenis Pesanan</p>
+                                <p class="text-sm text-gray-500">Jenis Transaksi</p>
                                 <p class="font-bold text-indigo-600">{{ ucfirst($pesanan->jenis_pesanan) }} {{ $pesanan->nama_event ? '('.$pesanan->nama_event.')' : '' }}</p>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm bg-gray-50 p-4 rounded-lg border border-gray-100 mb-4">
+                            <div>
+                                <p class="text-gray-500 text-xs uppercase font-bold tracking-wider mb-1">Metode Pengiriman</p>
+                                <p class="font-bold text-gray-900">
+                                    @if($pesanan->metode_pengiriman == 'ambil_sendiri')
+                                        🏪 Ambil Sendiri ke Toko
+                                    @else
+                                        🚚 Diantar Kurir Toko
+                                    @endif
+                                </p>
+                            </div>
+                            <div>
+                                <p class="text-gray-500 text-xs uppercase font-bold tracking-wider mb-1">Metode Pembayaran</p>
+                                <p class="font-bold text-gray-900">
+                                    @if($pesanan->tipe_pembayaran == 'cash')
+                                        💵 Tunai (Cash)
+                                    @else
+                                        💳 Transfer / Non-Tunai
+                                    @endif
+                                </p>
                             </div>
                         </div>
 
                         <div class="grid grid-cols-2 gap-4 text-sm">
                             <div>
-                                <p class="text-gray-500">Tanggal Pengantaran:</p>
+                                <p class="text-gray-500">{{ $pesanan->metode_pengiriman == 'ambil_sendiri' ? 'Tanggal Pengambilan:' : 'Tanggal Pengantaran:' }}</p>
                                 <p class="font-semibold">{{ \Carbon\Carbon::parse($pesanan->tanggal_pengantaran)->format('d M Y') }}</p>
                             </div>
                             @if($pesanan->jenis_pesanan == 'event')
                             <div>
-                                <p class="text-gray-500">Tenggat Pelunasan:</p>
+                                <p class="text-gray-500">Tenggat Pelunasan Bon:</p>
                                 <p class="font-semibold text-red-600">{{ \Carbon\Carbon::parse($pesanan->tenggat_pembayaran)->format('d M Y') }}</p>
                             </div>
                             @endif
@@ -63,8 +87,22 @@
                             </div>
                             @endforeach
                         </div>
-                        <div class="flex justify-between mt-6 pt-4 border-t-2">
-                            <p class="text-lg font-bold">Total Harga</p>
+                        
+                        <div class="mt-4 pt-4 border-t space-y-2 text-sm">
+                            <div class="flex justify-between text-gray-600">
+                                <span>Subtotal Barang</span>
+                                <span>Rp {{ number_format($pesanan->total_harga - $pesanan->ongkir, 0, ',', '.') }}</span>
+                            </div>
+                            <div class="flex justify-between text-gray-600">
+                                <span>Ongkos Kirim</span>
+                                <span class="{{ $pesanan->ongkir == 0 ? 'text-green-600 font-bold' : '' }}">
+                                    {{ $pesanan->ongkir == 0 ? 'Gratis' : 'Rp ' . number_format($pesanan->ongkir, 0, ',', '.') }}
+                                </span>
+                            </div>
+                        </div>
+
+                        <div class="flex justify-between mt-4 pt-4 border-t-2">
+                            <p class="text-lg font-bold">Total Keseluruhan</p>
                             <p class="text-lg font-black text-indigo-600">Rp {{ number_format($pesanan->total_harga, 0, ',', '.') }}</p>
                         </div>
                     </div>
@@ -72,7 +110,7 @@
 
                 <div class="md:col-span-1 space-y-6">
                     <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-6 border-t-4 border-indigo-500">
-                        <h3 class="font-bold text-lg mb-4">Informasi Pembayaran</h3>
+                        <h3 class="font-bold text-lg mb-4">Informasi Tagihan</h3>
                         
                         <div class="space-y-3 mb-6">
                             <div class="flex justify-between text-sm">
@@ -92,25 +130,38 @@
                         <div class="mb-6 text-center">
                             <p class="text-xs text-gray-500 mb-1">Status Pembayaran</p>
                             <span class="px-4 py-1 rounded-full text-sm font-black uppercase {{ $pesanan->status_pembayaran == 'lunas' ? 'bg-green-500 text-white' : 'bg-orange-500 text-white' }}">
-                                {{ $pesanan->status_pembayaran }}
+                                {{ str_replace('_', ' ', $pesanan->status_pembayaran) }}
                             </span>
                         </div>
 
                         @if($pesanan->status_pembayaran != 'lunas')
-                            <div class="space-y-3">
-                                <p class="text-xs text-gray-500 italic text-center">*Klik tombol di bawah untuk melakukan pembayaran via Midtrans</p>
-                                
-                                @if($pesanan->jenis_pesanan == 'event')
-                                    <div class="mt-4">
-                                        <label class="block text-xs font-bold mb-1">Nominal Cicilan (Rp)</label>
-                                        <input type="number" id="nominal_cicilan" class="w-full border-gray-300 rounded text-sm mb-2" placeholder="Masukkan jumlah bayar..." value="{{ $pesanan->total_harga - $pesanan->total_dibayar }}">
-                                    </div>
-                                @endif
+                            
+                            @if($pesanan->tipe_pembayaran == 'cash')
+                                <div class="bg-blue-50 border border-blue-200 p-4 rounded-lg text-center">
+                                    <svg class="w-8 h-8 text-blue-500 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
+                                    <p class="text-sm text-blue-800 font-bold">Pilih Bayar Tunai</p>
+                                    <p class="text-xs text-blue-600 mt-1">
+                                        Silakan siapkan uang tunai sejumlah tagihan saat 
+                                        {{ $pesanan->metode_pengiriman == 'diantar' ? 'kurir mengantar barang.' : 'mengambil barang di kasir toko.' }}
+                                    </p>
+                                </div>
+                            @else
+                                <div class="space-y-3">
+                                    <p class="text-xs text-gray-500 italic text-center">*Klik tombol di bawah untuk melakukan pembayaran via Midtrans</p>
+                                    
+                                    @if($pesanan->jenis_pesanan == 'event')
+                                        <div class="mt-4">
+                                            <label class="block text-xs font-bold mb-1">Nominal Cicilan (Rp)</label>
+                                            <input type="number" id="nominal_cicilan" class="w-full border-gray-300 rounded text-sm mb-2" placeholder="Masukkan jumlah bayar..." value="{{ $pesanan->total_harga - $pesanan->total_dibayar }}">
+                                        </div>
+                                    @endif
 
-                                <button type="button" id="pay-button" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-4 rounded shadow-lg transition duration-200">
-                                    Bayar Sekarang
-                                </button>
-                            </div>
+                                    <button type="button" id="pay-button" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-4 rounded shadow-lg transition duration-200">
+                                        Bayar Sekarang
+                                    </button>
+                                </div>
+                            @endif
+
                         @else
                             <div class="bg-green-50 p-4 rounded text-center border border-green-200 text-green-700 font-bold text-sm">
                                 Pesanan ini sudah lunas. Terima kasih!
@@ -136,76 +187,76 @@
         </div>
     </div>
 
-    <script src="https://app.sandbox.midtrans.com/snap/snap.js" data-client-key="{{ config('services.midtrans.client_key') }}"></script>
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const payButton = document.getElementById('pay-button');
-            
-            if (payButton) {
-                payButton.addEventListener('click', function () {
-                    // Ambil nominal dari input jika ada (untuk event), jika tidak ambil sisa tagihan
-                    const inputNominal = document.getElementById('nominal_cicilan');
-                    const sisaTagihan = {{ $pesanan->total_harga - $pesanan->total_dibayar }};
-                    const nominal = inputNominal ? parseInt(inputNominal.value) : sisaTagihan;
+    @if($pesanan->tipe_pembayaran != 'cash')
+        <script src="https://app.sandbox.midtrans.com/snap/snap.js" data-client-key="{{ config('services.midtrans.client_key') }}"></script>
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                const payButton = document.getElementById('pay-button');
+                
+                if (payButton) {
+                    payButton.addEventListener('click', function () {
+                        const inputNominal = document.getElementById('nominal_cicilan');
+                        const sisaTagihan = {{ $pesanan->total_harga - $pesanan->total_dibayar }};
+                        const nominal = inputNominal ? parseInt(inputNominal.value) : sisaTagihan;
 
-                    if (!nominal || nominal < 1000) {
-                        alert("Minimal pembayaran adalah Rp 1.000");
-                        return;
-                    }
-
-                    if (nominal > sisaTagihan) {
-                        alert("Nominal bayar tidak boleh melebihi sisa tagihan (Rp " + sisaTagihan.toLocaleString('id-ID') + ")");
-                        return;
-                    }
-
-                    // Disable button saat proses
-                    payButton.disabled = true;
-                    payButton.innerText = "Memproses...";
-
-                    fetch("{{ route('pelanggan.pembayaran.pay', $pesanan->id) }}", {
-                        method: "POST",
-                        headers: {
-                            "Content-Type": "application/json",
-                            "X-CSRF-TOKEN": "{{ csrf_token() }}",
-                            "Accept": "application/json"
-                        },
-                        body: JSON.stringify({ nominal: nominal })
-                    })
-                    .then(async response => {
-                        const data = await response.json();
-                        if (!response.ok) {
-                            throw new Error(data.message || "Terjadi kesalahan pada server");
+                        if (!nominal || nominal < 1000) {
+                            alert("Minimal pembayaran adalah Rp 1.000");
+                            return;
                         }
-                        return data;
-                    })
-                    .then(data => {
-                        window.snap.pay(data.snap_token, {
-                            onSuccess: function(result) {
-                                alert("Pembayaran Berhasil!");
-                                location.reload();
+
+                        if (nominal > sisaTagihan) {
+                            alert("Nominal bayar tidak boleh melebihi sisa tagihan (Rp " + sisaTagihan.toLocaleString('id-ID') + ")");
+                            return;
+                        }
+
+                        payButton.disabled = true;
+                        payButton.innerText = "Memproses...";
+
+                        fetch("{{ route('pelanggan.pembayaran.pay', $pesanan->id) }}", {
+                            method: "POST",
+                            headers: {
+                                "Content-Type": "application/json",
+                                "X-CSRF-TOKEN": "{{ csrf_token() }}",
+                                "Accept": "application/json"
                             },
-                            onPending: function(result) {
-                                alert("Menunggu Pembayaran...");
-                                location.reload();
-                            },
-                            onError: function(result) {
-                                alert("Pembayaran Gagal!");
-                                payButton.disabled = false;
-                                payButton.innerText = "Bayar Sekarang";
-                            },
-                            onClose: function() {
-                                payButton.disabled = false;
-                                payButton.innerText = "Bayar Sekarang";
+                            body: JSON.stringify({ nominal: nominal })
+                        })
+                        .then(async response => {
+                            const data = await response.json();
+                            if (!response.ok) {
+                                throw new Error(data.message || "Terjadi kesalahan pada server");
                             }
+                            return data;
+                        })
+                        .then(data => {
+                            window.snap.pay(data.snap_token, {
+                                onSuccess: function(result) {
+                                    alert("Pembayaran Berhasil!");
+                                    location.reload();
+                                },
+                                onPending: function(result) {
+                                    alert("Menunggu Pembayaran...");
+                                    location.reload();
+                                },
+                                onError: function(result) {
+                                    alert("Pembayaran Gagal!");
+                                    payButton.disabled = false;
+                                    payButton.innerText = "Bayar Sekarang";
+                                },
+                                onClose: function() {
+                                    payButton.disabled = false;
+                                    payButton.innerText = "Bayar Sekarang";
+                                }
+                            });
+                        })
+                        .catch(error => {
+                            alert(error.message);
+                            payButton.disabled = false;
+                            payButton.innerText = "Bayar Sekarang";
                         });
-                    })
-                    .catch(error => {
-                        alert(error.message);
-                        payButton.disabled = false;
-                        payButton.innerText = "Bayar Sekarang";
                     });
-                });
-            }
-        });
-    </script>
+                }
+            });
+        </script>
+    @endif
 </x-app-layout>

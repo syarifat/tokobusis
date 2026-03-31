@@ -65,4 +65,56 @@ class PesananController extends Controller
 
         return redirect()->back()->with('success', 'Status pesanan berhasil diperbarui.');
     }
+
+    // Method baru untuk mencatat pembayaran tunai manual oleh Admin
+    public function bayarTunai(Request $request, $id)
+    {
+        $pesanan = Pesanan::findOrFail($id);
+
+        // Pastikan hanya bisa untuk metode pembayaran cash
+        if ($pesanan->tipe_pembayaran !== 'cash') {
+            return back()->with('error', 'Hanya pesanan dengan tipe pembayaran tunai (cash) yang bisa dikonfirmasi manual.');
+        }
+
+        $request->validate([
+            'nominal' => 'required|numeric|min:1',
+        ]);
+
+        $nominal = $request->nominal;
+        $sisaTagihan = $pesanan->total_harga - $pesanan->total_dibayar;
+
+        // Validasi agar tidak lebih bayar
+        if ($nominal > $sisaTagihan) {
+            return back()->with('error', 'Nominal tidak boleh melebihi sisa tagihan (Rp ' . number_format($sisaTagihan, 0, ',', '.') . ').');
+        }
+
+        // 1. Buat record di tabel pembayarans
+        $pesanan->pembayarans()->create([
+            'kode_pembayaran'   => 'CASH-' . time(),
+            'nominal_bayar'     => $nominal,
+            'metode_pembayaran' => 'tunai/kasir',
+            'status_transaksi'  => 'sukses',
+            'waktu_bayar'       => now(),
+        ]);
+
+        // 2. Update akumulasi total_dibayar di tabel pesanans
+        $totalDibayarBaru = $pesanan->total_dibayar + $nominal;
+        
+        $pesanan->update([
+            'total_dibayar' => $totalDibayarBaru,
+        ]);
+
+        // 3. Jika sudah lunas, ubah status pembayarannya
+        if ($totalDibayarBaru >= $pesanan->total_harga) {
+            $pesanan->update([
+                'status_pembayaran' => 'lunas',
+            ]);
+        } elseif ($totalDibayarBaru > 0) {
+            $pesanan->update([
+                'status_pembayaran' => 'cicilan',
+            ]);
+        }
+
+        return back()->with('success', 'Pembayaran tunai sebesar Rp ' . number_format($nominal, 0, ',', '.') . ' berhasil dicatat.');
+    }
 }

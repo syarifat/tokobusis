@@ -158,39 +158,50 @@
                     </div>
 
                     <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-                        <div class="px-6 py-4 border-b border-gray-100 bg-gray-50">
-                            <h3 class="text-lg font-bold text-gray-900">Riwayat Pembayaran via Midtrans</h3>
+                        <div class="px-6 py-4 border-b border-gray-100 bg-gray-50 flex justify-between items-center">
+                            <h3 class="text-lg font-bold text-gray-900">Riwayat Pembayaran</h3>
+                            <span class="text-xs font-bold px-2 py-1 rounded {{ $pesanan->tipe_pembayaran == 'cash' ? 'bg-green-100 text-green-700' : 'bg-indigo-100 text-indigo-700' }}">
+                                {{ $pesanan->tipe_pembayaran == 'cash' ? 'TUNAI' : 'MIDTRANS' }}
+                            </span>
                         </div>
                         <div class="p-6">
-                            @if($pesanan->tipe_pembayaran == 'cash')
-                                <div class="text-center py-6 text-gray-500 text-sm">
-                                    <p class="font-bold">Transaksi ini menggunakan metode Tunai (Cash).</p>
-                                    <p class="text-xs mt-1">Pembayaran tidak dicatat secara otomatis oleh Midtrans.</p>
+                            
+                            @if($pesanan->tipe_pembayaran == 'cash' && $pesanan->status_pembayaran != 'lunas')
+                                <div class="bg-blue-50 border border-blue-200 p-4 rounded-lg mb-6">
+                                    <h4 class="text-sm font-bold text-blue-900 mb-2">Terima Pembayaran Tunai</h4>
+                                    <p class="text-xs text-blue-700 mb-3">Pesanan ini menggunakan metode Cash. Masukkan nominal uang yang diterima dari pelanggan (Kasir/Kurir).</p>
+                                    
+                                    <form action="{{ route('admin.pesanan.bayarTunai', $pesanan->id) }}" method="POST" class="flex gap-2">
+                                        @csrf
+                                        <input type="number" name="nominal" class="flex-1 rounded-md border-gray-300 text-sm focus:ring-blue-500" value="{{ $pesanan->total_harga - $pesanan->total_dibayar }}" min="1" max="{{ $pesanan->total_harga - $pesanan->total_dibayar }}" required>
+                                        <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-bold transition">Catat Bayar</button>
+                                    </form>
+                                </div>
+                            @endif
+
+                            @if($pesanan->pembayarans->count() > 0)
+                                <div class="space-y-4">
+                                    <p class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Histori Transaksi Berhasil</p>
+                                    @foreach($pesanan->pembayarans->where('status_transaksi', 'sukses') as $bayar)
+                                    <div class="flex justify-between items-center border-l-4 border-green-500 pl-4 py-2 bg-gray-50 rounded-r-lg">
+                                        <div>
+                                            <p class="font-bold text-gray-800 text-sm">Rp {{ number_format($bayar->nominal_bayar, 0, ',', '.') }}</p>
+                                            <p class="text-[10px] text-gray-400 mt-1">{{ $bayar->waktu_bayar ? \Carbon\Carbon::parse($bayar->waktu_bayar)->format('d M Y, H:i') : '-' }} • {{ strtoupper($bayar->metode_pembayaran) }}</p>
+                                        </div>
+                                        <div>
+                                            <span class="px-2.5 py-1 rounded-full text-[10px] font-black uppercase bg-green-100 text-green-700">
+                                                SUKSES
+                                            </span>
+                                        </div>
+                                    </div>
+                                    @endforeach
                                 </div>
                             @else
-                                @if($pesanan->pembayarans->count() > 0)
-                                    <div class="space-y-4">
-                                        @foreach($pesanan->pembayarans as $bayar)
-                                        <div class="flex justify-between items-center border-l-4 {{ $bayar->status_transaksi == 'sukses' ? 'border-green-500' : 'border-yellow-400' }} pl-4 py-2 bg-gray-50 rounded-r-lg">
-                                            <div>
-                                                <p class="font-bold text-gray-800 text-sm">Rp {{ number_format($bayar->nominal_bayar, 0, ',', '.') }}</p>
-                                                <p class="text-xs text-gray-500 mt-0.5">Kode: {{ $bayar->kode_pembayaran }}</p>
-                                                <p class="text-[10px] text-gray-400 mt-1">{{ $bayar->waktu_bayar ? \Carbon\Carbon::parse($bayar->waktu_bayar)->format('d M Y, H:i') : 'Menunggu pembayaran' }} • {{ strtoupper($bayar->metode_pembayaran ?? 'Online') }}</p>
-                                            </div>
-                                            <div>
-                                                <span class="px-2.5 py-1 rounded-full text-[10px] font-black uppercase {{ $bayar->status_transaksi == 'sukses' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700' }}">
-                                                    {{ $bayar->status_transaksi }}
-                                                </span>
-                                            </div>
-                                        </div>
-                                        @endforeach
-                                    </div>
-                                @else
-                                    <div class="text-center py-6 text-gray-400 text-sm">
-                                        <p>Belum ada riwayat pembayaran transfer/online untuk pesanan ini.</p>
-                                    </div>
-                                @endif
+                                <div class="text-center py-6 text-gray-400 text-sm border-t border-dashed mt-2">
+                                    <p>Belum ada riwayat pembayaran yang tercatat.</p>
+                                </div>
                             @endif
+
                         </div>
                     </div>
 

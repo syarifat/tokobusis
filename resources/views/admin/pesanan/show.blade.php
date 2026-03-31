@@ -14,7 +14,9 @@
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                
                 <div class="md:col-span-1 space-y-6">
+                    
                     <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
                         <h3 class="text-lg font-bold text-gray-900 border-b pb-2 mb-4">Informasi Pelanggan</h3>
                         <div class="space-y-3 text-sm">
@@ -34,6 +36,45 @@
                     </div>
 
                     <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+                        <h3 class="text-lg font-bold text-gray-900 border-b pb-2 mb-4">Pengiriman & Lokasi</h3>
+                        <div class="space-y-4 text-sm">
+                            <div>
+                                <p class="text-gray-500 text-xs">Metode Pengiriman</p>
+                                <p class="font-bold {{ $pesanan->metode_pengiriman == 'ambil_sendiri' ? 'text-orange-600' : 'text-blue-600' }}">
+                                    {{ $pesanan->metode_pengiriman == 'ambil_sendiri' ? '🏪 Ambil Sendiri ke Toko' : '🚚 Diantar Kurir Toko' }}
+                                </p>
+                            </div>
+
+                            @if($pesanan->metode_pengiriman == 'diantar')
+                                <div>
+                                    <p class="text-gray-500 text-xs">Alamat Tujuan</p>
+                                    <p class="font-medium text-gray-800">{{ $pesanan->user->alamat }}</p>
+                                </div>
+                                
+                                <div>
+                                    <p class="text-gray-500 text-xs mb-2">Titik Koordinat (GPS)</p>
+                                    @if($pesanan->latitude && $pesanan->longitude)
+                                        <a href="https://www.google.com/maps/search/?api=1&query={{ $pesanan->latitude }},{{ $pesanan->longitude }}" target="_blank" class="flex items-center justify-center w-full bg-blue-50 text-blue-700 hover:bg-blue-600 hover:text-white border border-blue-200 font-bold py-2 px-4 rounded-lg transition shadow-sm">
+                                            <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"></path></svg>
+                                            Buka di Google Maps
+                                        </a>
+                                        <p class="text-[10px] text-gray-400 mt-1 text-center font-mono">{{ $pesanan->latitude }}, {{ $pesanan->longitude }}</p>
+                                    @else
+                                        <div class="bg-red-50 text-red-600 p-2 rounded text-xs text-center border border-red-200 font-bold">
+                                            ⚠️ Titik GPS tidak dilampirkan.
+                                        </div>
+                                    @endif
+                                </div>
+                            @endif
+
+                            <div class="border-t pt-3">
+                                <p class="text-gray-500 text-xs">{{ $pesanan->metode_pengiriman == 'ambil_sendiri' ? 'Tanggal Diambil' : 'Tanggal Diantar' }}</p>
+                                <p class="font-bold">{{ \Carbon\Carbon::parse($pesanan->tanggal_pengantaran)->format('d F Y') }}</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
                         <h3 class="text-lg font-bold text-gray-900 border-b pb-2 mb-4">Ringkasan Tagihan</h3>
                         
                         <div class="space-y-3 text-sm mb-6">
@@ -48,17 +89,6 @@
                             <div class="flex justify-between border-t pt-2 mt-2">
                                 <span class="font-bold text-gray-800">Sisa Tagihan</span>
                                 <span class="font-black text-red-600">Rp {{ number_format($pesanan->total_harga - $pesanan->total_dibayar, 0, ',', '.') }}</span>
-                            </div>
-                        </div>
-
-                        <div class="grid grid-cols-2 gap-2 text-center text-xs font-bold mb-2">
-                            <div class="p-2 rounded-lg border {{ $pesanan->metode_pengiriman == 'ambil_sendiri' ? 'bg-orange-50 border-orange-200 text-orange-700' : 'bg-blue-50 border-blue-200 text-blue-700' }}">
-                                <p class="text-[10px] text-gray-500 font-normal uppercase mb-1">Pengiriman</p>
-                                {{ $pesanan->metode_pengiriman == 'ambil_sendiri' ? 'Ambil Sendiri' : 'Diantar Kurir' }}
-                            </div>
-                            <div class="p-2 rounded-lg border {{ $pesanan->tipe_pembayaran == 'cash' ? 'bg-green-50 border-green-200 text-green-700' : 'bg-indigo-50 border-indigo-200 text-indigo-700' }}">
-                                <p class="text-[10px] text-gray-500 font-normal uppercase mb-1">Tipe Bayar</p>
-                                {{ $pesanan->tipe_pembayaran == 'cash' ? 'Tunai (Cash)' : 'Transfer / Midtrans' }}
                             </div>
                         </div>
 
@@ -109,10 +139,13 @@
                 </div>
 
                 <div class="md:col-span-2 space-y-6">
+                    
                     <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
                         <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50">
                             <h3 class="text-lg font-bold text-gray-900">Rincian Barang</h3>
-                            <span class="text-sm text-gray-500 font-semibold">Tgl Antar/Ambil: {{ \Carbon\Carbon::parse($pesanan->tanggal_pengantaran)->format('d/m/Y') }}</span>
+                            <span class="text-sm text-gray-500 font-semibold">
+                                Tgl {{ $pesanan->metode_pengiriman == 'ambil_sendiri' ? 'Ambil' : 'Antar' }}: {{ \Carbon\Carbon::parse($pesanan->tanggal_pengantaran)->format('d/m/Y') }}
+                            </span>
                         </div>
                         <div class="p-6">
                             <div class="space-y-4">
@@ -161,7 +194,7 @@
                         <div class="px-6 py-4 border-b border-gray-100 bg-gray-50 flex justify-between items-center">
                             <h3 class="text-lg font-bold text-gray-900">Riwayat Pembayaran</h3>
                             <span class="text-xs font-bold px-2 py-1 rounded {{ $pesanan->tipe_pembayaran == 'cash' ? 'bg-green-100 text-green-700' : 'bg-indigo-100 text-indigo-700' }}">
-                                {{ $pesanan->tipe_pembayaran == 'cash' ? 'TUNAI' : 'MIDTRANS' }}
+                                {{ $pesanan->tipe_pembayaran == 'cash' ? 'METODE: TUNAI' : 'METODE: TRANSFER / MIDTRANS' }}
                             </span>
                         </div>
                         <div class="p-6">
@@ -171,7 +204,7 @@
                                     <h4 class="text-sm font-bold text-blue-900 mb-2">Terima Pembayaran Tunai</h4>
                                     <p class="text-xs text-blue-700 mb-3">Pesanan ini menggunakan metode Cash. Masukkan nominal uang yang diterima dari pelanggan (Kasir/Kurir).</p>
                                     
-                                    <form action="{{ route('admin.pesanan.bayarTunai', $pesanan->id) }}" method="POST" class="flex gap-2">
+                                    <form action="{{ route('pesanan.bayarTunai', $pesanan->id) }}" method="POST" class="flex gap-2">
                                         @csrf
                                         <input type="number" name="nominal" class="flex-1 rounded-md border-gray-300 text-sm focus:ring-blue-500" value="{{ $pesanan->total_harga - $pesanan->total_dibayar }}" min="1" max="{{ $pesanan->total_harga - $pesanan->total_dibayar }}" required>
                                         <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-bold transition">Catat Bayar</button>

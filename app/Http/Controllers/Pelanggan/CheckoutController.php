@@ -78,10 +78,11 @@ class CheckoutController extends Controller
             'tanggal_pengantaran' => 'required|date|after_or_equal:today',
             'jenis_pesanan'       => 'required|in:reguler,event',
             'event_id'            => 'required_if:jenis_pesanan,event',
+            'metode_pengiriman'   => 'required|in:diantar,ambil_sendiri', // <-- Validasi Baru
+            'tipe_pembayaran'     => 'required|in:transfer,cash',         // <-- Validasi Baru
             'catatan'             => 'nullable|string'
         ]);
 
-        // Ambil HANYA keranjang yang dipilih
         $keranjangs = Keranjang::with('barang')
             ->where('user_id', Auth::id())
             ->whereIn('id', $request->selected_items)
@@ -91,12 +92,17 @@ class CheckoutController extends Controller
             return redirect()->route('pelanggan.dashboard')->with('error', 'Tidak ada barang yang dipilih untuk checkout.');
         }
 
-        // --- LOGIKA ONGKIR (Dihitung ulang di backend demi keamanan) ---
         $subtotal = $keranjangs->sum(function($item) {
             return $item->qty * $item->barang->harga;
         });
         
-        $ongkir = $subtotal >= 150000 ? 0 : 10000;
+        // --- LOGIKA ONGKIR BARU ---
+        if ($request->metode_pengiriman == 'ambil_sendiri') {
+            $ongkir = 0; // Kalo ambil ke toko, ongkir gratis mutlak!
+        } else {
+            $ongkir = $subtotal >= 150000 ? 0 : 10000; // Kalo diantar, cek subtotal
+        }
+        
         $totalKeseluruhan = $subtotal + $ongkir;
 
         $kode_pesanan = 'ORD-' . date('Ymd') . '-' . strtoupper(Str::random(5));
@@ -106,8 +112,10 @@ class CheckoutController extends Controller
             'kode_pesanan'        => $kode_pesanan,
             'jenis_pesanan'       => $request->jenis_pesanan,
             'tanggal_pengantaran' => $request->tanggal_pengantaran,
-            'total_harga'         => $totalKeseluruhan, // Ini sekarang menyimpan Grand Total
-            'ongkir'              => $ongkir,           // Simpan data ongkir ke kolom baru
+            'total_harga'         => $totalKeseluruhan, 
+            'ongkir'              => $ongkir,           
+            'metode_pengiriman'   => $request->metode_pengiriman, // <-- Simpan ke DB
+            'tipe_pembayaran'     => $request->tipe_pembayaran,   // <-- Simpan ke DB
             'total_dibayar'       => 0,
             'status_pesanan'      => 'menunggu',
             'status_pembayaran'   => 'belum_bayar',

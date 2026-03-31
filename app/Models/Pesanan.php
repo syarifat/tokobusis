@@ -19,6 +19,8 @@ class Pesanan extends Model
         'tenggat_pembayaran',
         'total_harga',
         'ongkir',
+        'metode_pengiriman', // <-- TAMBAHKAN INI
+        'tipe_pembayaran',   // <-- TAMBAHKAN INI
         'total_dibayar',
         'status_pesanan',
         'status_pembayaran',

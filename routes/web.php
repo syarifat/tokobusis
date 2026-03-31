@@ -43,7 +43,7 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::delete('/pelanggan/{pelanggan}', [PelangganController::class, 'destroy'])->name('pelanggan.destroy');
     Route::get('/laporan', [LaporanController::class, 'index'])->name('laporan.index');
     Route::get('/laporan/pdf', [LaporanController::class, 'exportPdf'])->name('laporan.pdf');
-    Route::post('/admin/pesanan/{id}/bayar-tunai', [AdminPesanan::class, 'bayarTunai'])->name('admin.pesanan.bayarTunai');
+    Route::post('/pesanan/{id}/bayar-tunai', [AdminPesanan::class, 'bayarTunai'])->name('pesanan.bayarTunai');
 });
 
 // Route khusus Pelanggan

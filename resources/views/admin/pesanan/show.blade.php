@@ -204,7 +204,7 @@
                                     <h4 class="text-sm font-bold text-blue-900 mb-2">Terima Pembayaran Tunai</h4>
                                     <p class="text-xs text-blue-700 mb-3">Pesanan ini menggunakan metode Cash. Masukkan nominal uang yang diterima dari pelanggan (Kasir/Kurir).</p>
                                     
-                                    <form action="{{ route('pesanan.bayarTunai', $pesanan->id) }}" method="POST" class="flex gap-2">
+                                    <form action="{{ route('admin.pesanan.bayarTunai', $pesanan->id) }}" method="POST" class="flex gap-2">
                                         @csrf
                                         <input type="number" name="nominal" class="flex-1 rounded-md border-gray-300 text-sm focus:ring-blue-500" value="{{ $pesanan->total_harga - $pesanan->total_dibayar }}" min="1" max="{{ $pesanan->total_harga - $pesanan->total_dibayar }}" required>
                                         <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-bold transition">Catat Bayar</button>

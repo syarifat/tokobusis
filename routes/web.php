@@ -64,6 +64,7 @@ Route::prefix('pelanggan')->name('pelanggan.')->group(function () {
     Route::get('/pesanan', [PelangganPesanan::class, 'index'])->name('pesanan.index');
     Route::get('/pesanan/{pesanan}', [PelangganPesanan::class, 'show'])->name('pesanan.show');
     Route::post('/pesanan/{pesanan}/pay', [PembayaranController::class, 'pay'])->name('pembayaran.pay');
+    Route::get('/rekomendasi', [\App\Http\Controllers\Pelanggan\RekomendasiController::class, 'index'])->name('rekomendasi.index');
     });
 });
 

@@ -46,7 +46,7 @@ class EventController extends Controller
         // LOGIKA LAMA (Sesuai kode asli kamu)
         $request->validate([
             'nama_acara' => 'required|string|max:255',
-            'tanggal_acara' => 'required|date|after:today',
+            'tanggal_acara' => 'required|date|after:today|before_or_equal:+1 month',
             'keterangan' => 'nullable|string'
         ]);
 

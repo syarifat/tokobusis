@@ -267,8 +267,9 @@
                             </div>
 
                             <div class="mb-4 mt-6">
-                                <label class="block text-gray-700 text-sm font-bold mb-2" x-text="pengiriman == 'diantar' ? 'Tanggal Pengantaran Barang' : 'Tanggal Pengambilan ke Toko'"></label>
-                                <input type="date" name="tanggal_pengantaran" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 focus:outline-none focus:shadow-outline" required min="{{ date('Y-m-d') }}">
+                                <label class="block text-gray-700 text-sm font-bold mb-1" x-text="pengiriman == 'diantar' ? 'Tanggal Pengantaran Barang' : 'Tanggal Pengambilan ke Toko'"></label>
+                                <p class="text-xs text-gray-500 mb-2 italic">*Maksimal pemesanan/pengantaran adalah 1 bulan dari hari ini.</p>
+                                <input type="date" name="tanggal_pengantaran" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 focus:outline-none focus:shadow-outline" required min="{{ date('Y-m-d') }}" max="{{ \Carbon\Carbon::now()->addMonth()->format('Y-m-d') }}">
                             </div>
 
                             <div class="mb-4">

@@ -51,8 +51,9 @@
                                     <input type="text" name="nama_acara" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" placeholder="Contoh: Pernikahan Anak Pertama, Pitonan" required>
                                 </div>
                                 <div>
-                                    <label class="block text-gray-700 text-sm font-bold mb-2">Tanggal Pelaksanaan Acara</label>
-                                    <input type="date" name="tanggal_acara" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" required>
+                                    <label class="block text-gray-700 text-sm font-bold mb-1">Tanggal Pelaksanaan Acara</label>
+                                    <p class="text-xs text-gray-500 mb-2 italic">*Maksimal pengajuan acara adalah 1 bulan dari hari ini.</p>
+                                    <input type="date" name="tanggal_acara" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" required min="{{ date('Y-m-d') }}" max="{{ \Carbon\Carbon::now()->addMonth()->format('Y-m-d') }}">
                                 </div>
                                 <div class="md:col-span-2">
                                     <label class="block text-gray-700 text-sm font-bold mb-2">Keterangan Tambahan (Opsional)</label>

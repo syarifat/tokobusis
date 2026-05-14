@@ -75,7 +75,7 @@ class CheckoutController extends Controller
         $request->validate([
             'selected_items'      => 'required|array', 
             'selected_items.*'    => 'exists:keranjangs,id',
-            'tanggal_pengantaran' => 'required|date|after_or_equal:today',
+            'tanggal_pengantaran' => 'required|date|after_or_equal:today|before_or_equal:+1 month',
             'jenis_pesanan'       => 'required|in:reguler,event',
             'event_id'            => 'required_if:jenis_pesanan,event',
             'jumlah_cicilan'      => 'required_if:jenis_pesanan,event|in:1,3,6',

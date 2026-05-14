@@ -100,11 +100,11 @@
                                     </td>
                                     
                                     <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm text-center">
-                                        @if($p->status_pembayaran == 'lunas')
+                                        @if($p->is_lunas)
                                             <span class="text-green-600 font-bold text-xs uppercase">Lunas</span>
                                         @elseif($p->status_pembayaran == 'cicilan')
                                             <span class="text-orange-600 font-bold text-xs uppercase">Cicilan</span>
-                                            <p class="text-[10px] text-gray-500 mt-1 font-semibold">Sisa: Rp {{ number_format($p->total_harga - $p->total_dibayar, 0, ',', '.') }}</p>
+                                            <p class="text-[10px] text-gray-500 mt-1 font-semibold">Sisa: Rp {{ number_format($p->sisa_tagihan, 0, ',', '.') }}</p>
                                         @else
                                             <span class="text-red-600 font-bold text-xs uppercase">Belum Bayar</span>
                                         @endif

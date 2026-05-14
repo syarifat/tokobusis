@@ -116,21 +116,15 @@
                             </div>
                         @endif
 
-                        @php
-                            $dendaAktif = ($pesanan->status_pembayaran == 'lunas' || $pesanan->total_dibayar >= $pesanan->total_harga) 
-                                ? max(0, $pesanan->total_dibayar - $pesanan->total_harga) 
-                                : $pesanan->hitungDenda();
-                            $sisaTagihanTampil = max(0, ($pesanan->total_harga + $dendaAktif) - $pesanan->total_dibayar);
-                        @endphp
                         <div class="space-y-3 text-sm mb-6">
                             <div class="flex justify-between">
                                 <span class="text-gray-500">Total Pokok Tagihan</span>
                                 <span class="font-bold">Rp {{ number_format($pesanan->total_harga, 0, ',', '.') }}</span>
                             </div>
-                            @if($dendaAktif > 0)
+                            @if($pesanan->hitungDenda() > 0 || ($pesanan->total_dibayar > $pesanan->total_harga))
                             <div class="flex justify-between text-red-600">
                                 <span>Denda Keterlambatan</span>
-                                <span class="font-bold">+ Rp {{ number_format($dendaAktif, 0, ',', '.') }}</span>
+                                <span class="font-bold">+ Rp {{ number_format(max($pesanan->hitungDenda(), $pesanan->total_dibayar - $pesanan->total_harga), 0, ',', '.') }}</span>
                             </div>
                             @endif
                             <div class="flex justify-between">
@@ -139,15 +133,14 @@
                             </div>
                             <div class="flex justify-between border-t pt-2 mt-2">
                                 <span class="font-bold text-gray-800">Sisa Tagihan</span>
-                                <span class="font-black text-red-600">Rp {{ number_format($sisaTagihanTampil, 0, ',', '.') }}</span>
+                                <span class="font-black text-red-600">Rp {{ number_format($pesanan->sisa_tagihan, 0, ',', '.') }}</span>
                             </div>
                         </div>
 
                         <div class="grid grid-cols-2 gap-2 text-center text-xs font-bold mb-4">
-                            @php $isLunas = $pesanan->status_pembayaran == 'lunas' || $sisaTagihanTampil == 0; @endphp
-                            <div class="p-2 rounded-lg border {{ $isLunas ? 'bg-green-50 border-green-200 text-green-700' : 'bg-orange-50 border-orange-200 text-orange-700' }}">
+                            <div class="p-2 rounded-lg border {{ $pesanan->is_lunas ? 'bg-green-50 border-green-200 text-green-700' : 'bg-orange-50 border-orange-200 text-orange-700' }}">
                                 <p class="text-[10px] text-gray-500 font-normal uppercase mb-1">Status Bayar</p>
-                                {{ $isLunas ? 'LUNAS' : strtoupper($pesanan->status_pembayaran) }}
+                                {{ $pesanan->is_lunas ? 'LUNAS' : strtoupper($pesanan->status_pembayaran) }}
                             </div>
                             <div class="p-2 rounded-lg border {{ $pesanan->jenis_pesanan == 'event' ? 'bg-purple-50 border-purple-200 text-purple-700' : 'bg-gray-50 border-gray-200 text-gray-700' }}">
                                 <p class="text-[10px] text-gray-500 font-normal uppercase mb-1">Jenis Pesanan</p>
@@ -237,15 +230,16 @@
                                 </div>
                             </div>
                         </div>
-                        @if($dendaAktif > 0)
+                        @php $dendaTampil = max($pesanan->hitungDenda(), $pesanan->total_dibayar - $pesanan->total_harga); @endphp
+                        @if($dendaTampil > 0)
                         <div class="px-6 py-3 border-t border-red-100 flex justify-between items-center bg-red-50 text-red-600 text-sm">
                             <span class="font-bold">Total Denda Keterlambatan</span>
-                            <span class="font-bold">+ Rp {{ number_format($dendaAktif, 0, ',', '.') }}</span>
+                            <span class="font-bold">+ Rp {{ number_format($dendaTampil, 0, ',', '.') }}</span>
                         </div>
                         @endif
                         <div class="bg-gray-50 px-6 py-4 border-t border-gray-100 flex justify-between items-center">
                             <span class="text-gray-500 font-bold uppercase text-sm">Total Keseluruhan</span>
-                            <span class="text-xl font-black text-gray-900">Rp {{ number_format($pesanan->total_harga + $dendaAktif, 0, ',', '.') }}</span>
+                            <span class="text-xl font-black text-gray-900">Rp {{ number_format($pesanan->total_harga + $dendaTampil, 0, ',', '.') }}</span>
                         </div>
                     </div>
 

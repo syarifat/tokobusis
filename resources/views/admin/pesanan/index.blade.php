@@ -113,12 +113,12 @@
                                 </td>
 
                                 <td class="px-5 py-5 border-b border-gray-200 text-sm text-center">
-                                    @if($p->status_pembayaran == 'lunas')
-                                        <span class="bg-green-100 text-green-800 py-1 px-3 rounded-full text-xs font-bold uppercase">Lunas</span>
+                                    @if($p->is_lunas)
+                                        <span class="bg-green-100 text-green-800 py-1 px-3 rounded-full text-xs font-bold uppercase whitespace-nowrap">Lunas</span>
                                     @elseif($p->status_pembayaran == 'cicilan')
                                         <div class="flex flex-col items-center">
-                                            <span class="bg-orange-100 text-orange-800 py-1 px-3 rounded-full text-xs font-bold uppercase">Cicilan</span>
-                                            <p class="text-[10px] mt-1 text-gray-500 font-bold">Dibayar: Rp {{ number_format($p->total_dibayar, 0, ',', '.') }}</p>
+                                            <span class="bg-orange-100 text-orange-800 py-1 px-3 rounded-full text-[10px] font-black uppercase">Cicilan</span>
+                                            <p class="text-[9px] mt-1 text-gray-500 font-bold whitespace-nowrap">Sisa: Rp {{ number_format($p->sisa_tagihan, 0, ',', '.') }}</p>
                                         </div>
                                     @else
                                         <span class="bg-red-100 text-red-800 py-1 px-3 rounded-full text-xs font-bold uppercase whitespace-nowrap">Belum Bayar</span>

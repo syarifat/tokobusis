@@ -87,4 +87,27 @@ class Pesanan extends Model
 
         return round($sisa * 0.10 * $monthsOverdue);
     }
+
+    public function getSisaTagihanAttribute()
+    {
+        // Jika sudah lunas di DB, sisa pasti 0
+        if ($this->status_pembayaran === 'lunas') {
+            return 0;
+        }
+
+        // Denda aktif adalah denda yang belum dibayar
+        // Jika total_dibayar > total_harga, berarti denda sudah mulai dicicil
+        $denda = $this->hitungDenda();
+        
+        $totalTagihan = $this->total_harga + $denda;
+        return max(0, $totalTagihan - $this->total_dibayar);
+    }
+
+    public function getIsLunasAttribute()
+    {
+        if ($this->status_pembayaran === 'lunas') {
+            return true;
+        }
+        return $this->sisa_tagihan <= 0;
+    }
 }

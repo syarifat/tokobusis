@@ -33,17 +33,22 @@ class MidtransWebhookController extends Controller
             $pesanan = $pembayaran->pesanan;
             $newTotalDibayar = $pesanan->total_dibayar + $pembayaran->nominal_bayar;
             
-            $statusBayar = ($newTotalDibayar >= $pesanan->total_harga) ? 'lunas' : 'cicilan';
+            // Re-calculate denda to check if it's fully paid
+            $denda = $pesanan->hitungDenda();
+            $statusBayar = ($newTotalDibayar >= ($pesanan->total_harga + $denda)) ? 'lunas' : 'cicilan';
 
             $pesanan->update([
                 'total_dibayar' => $newTotalDibayar,
                 'status_pembayaran' => $statusBayar
             ]);
+            
+            $sisaKirim = max(0, ($pesanan->total_harga + $denda) - $newTotalDibayar);
+
             // Kirim WA Notifikasi ke Pelanggan
             $wa = new FonnteService();
             $pesanUser = "✅ *PEMBAYARAN DITERIMA*\n\n" .
                         "Halo {$pesanan->user->name}, pembayaran untuk pesanan *{$pesanan->kode_pesanan}* sebesar Rp " . number_format($pembayaran->nominal_bayar, 0, ',', '.') . " telah kami terima.\n\n" .
-                        "Sisa Tagihan: Rp " . number_format($pesanan->total_harga - $pesanan->total_dibayar, 0, ',', '.') . "\n" .
+                        "Sisa Tagihan: Rp " . number_format($sisaKirim, 0, ',', '.') . "\n" .
                         "Status: " . strtoupper($statusBayar) . "\n\n" .
                         "Terima kasih telah berbelanja di Toko Bu Sis!";
 

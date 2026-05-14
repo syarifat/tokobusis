@@ -81,7 +81,8 @@ class PesananController extends Controller
         ]);
 
         $nominal = $request->nominal;
-        $sisaTagihan = $pesanan->total_harga - $pesanan->total_dibayar;
+        $denda = $pesanan->hitungDenda();
+        $sisaTagihan = ($pesanan->total_harga + $denda) - $pesanan->total_dibayar;
 
         // Validasi agar tidak lebih bayar
         if ($nominal > $sisaTagihan) {
@@ -105,7 +106,7 @@ class PesananController extends Controller
         ]);
 
         // 3. Jika sudah lunas, ubah status pembayarannya
-        if ($totalDibayarBaru >= $pesanan->total_harga) {
+        if ($totalDibayarBaru >= ($pesanan->total_harga + $denda)) {
             $pesanan->update([
                 'status_pembayaran' => 'lunas',
             ]);

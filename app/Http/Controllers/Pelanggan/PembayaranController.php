@@ -19,7 +19,7 @@ class PembayaranController extends Controller
         ]);
 
         // Cek sisa tagihan
-        $sisaTagihan = $pesanan->total_harga - $pesanan->total_dibayar;
+        $sisaTagihan = ($pesanan->total_harga + $pesanan->hitungDenda()) - $pesanan->total_dibayar;
         if ($request->nominal > $sisaTagihan) {
             return response()->json(['message' => 'Nominal melebihi sisa tagihan'], 422);
         }

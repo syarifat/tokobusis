@@ -261,10 +261,10 @@
                         </a>
                     </div>
                 </div>
-                <div class="w-full md:w-1/2 h-64 md:h-auto min-h-[400px] relative">
-                    {{-- Iframe Google Maps (Menggunakan koordinat default/umum untuk preview, link tombol menuju URL spesifik) --}}
+                <div class="w-full md:w-1/2 h-64 md:h-auto min-h-[400px] relative rounded-r-3xl overflow-hidden">
+                    {{-- Iframe Google Maps --}}
                     <iframe 
-                        src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d126438.2854809817!2d111.82424074213198!3d-8.064507026721021!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x2e78e2e2a33dbd4b%3A0xc62b460c50005d5f!2sTulungagung%2C%20Tulungagung%20Regency%2C%20East%20Java!5e0!3m2!1sen!2sid!4v1715690835474!5m2!1sen!2sid" 
+                        src="https://maps.google.com/maps?q=Toko%20Pawon%20Bu%20Sis,%20Dusun%20cari,%20Banjarsari,%20Kec.%20Ngantru,%20Kabupaten%20Tulungagung,%20Jawa%20Timur%2066252&t=&z=15&ie=UTF8&iwloc=&output=embed" 
                         class="absolute inset-0 w-full h-full border-0" 
                         allowfullscreen="" 
                         loading="lazy" 

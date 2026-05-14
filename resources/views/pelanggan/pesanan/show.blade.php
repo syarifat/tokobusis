@@ -186,7 +186,7 @@
                             </span>
                         </div>
 
-                        @if(!$isLunas)
+                        @if(!$pesanan->is_lunas)
                             
                             @if($pesanan->tipe_pembayaran == 'cash')
                                 <div class="bg-blue-50 border border-blue-200 p-4 rounded-lg text-center">

@@ -42,15 +42,10 @@ class DashboardController extends Controller
             ->orderBy('label', 'asc')
             ->get();
 
-        // Grafik Cicilan Berlangsung (Berapa banyak pesanan yang sedang dicicil)
-        $installmentData = Pesanan::where('status_pembayaran', 'cicilan')
-            ->whereBetween('created_at', [$startDate, $endDate])
-            ->select(
-                DB::raw("DATE_FORMAT(created_at, '$format') as label"),
-                DB::raw("COUNT(*) as total_count")
-            )
-            ->groupBy('label')
-            ->orderBy('label', 'asc')
+        // List Cicilan Berlangsung (Data detail untuk tabel)
+        $ongoingInstallments = Pesanan::with('user')
+            ->where('status_pembayaran', 'cicilan')
+            ->orderBy('tenggat_pembayaran', 'asc')
             ->get();
 
         // 4. Statistik Pelanggan Teraktif
@@ -85,7 +80,7 @@ class DashboardController extends Controller
             'pesananTerbaru',
             'barangStokTipis',
             'revenueData',
-            'installmentData',
+            'ongoingInstallments',
             'topBuyers',
             'topEventCustomers',
             'startDate',

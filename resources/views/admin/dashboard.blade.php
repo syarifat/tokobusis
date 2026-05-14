@@ -84,13 +84,59 @@
                     </div>
                 </div>
 
-                <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex flex-col h-full">
                     <h3 class="font-bold text-gray-800 mb-4 flex items-center">
                         <div class="w-2 h-6 bg-orange-500 rounded-full mr-2"></div>
-                        Grafik Cicilan Berlangsung (Aktif)
+                        Daftar Cicilan Berlangsung
                     </h3>
-                    <div class="h-64">
-                        <canvas id="installmentChart"></canvas>
+                    <div class="flex-1 overflow-y-auto" style="max-height: 256px;">
+                        <table class="min-w-full divide-y divide-gray-100">
+                            <thead class="bg-gray-50/50 sticky top-0">
+                                <tr>
+                                    <th class="px-4 py-2 text-left text-[10px] font-black text-gray-500 uppercase">Pelanggan/Event</th>
+                                    <th class="px-4 py-2 text-center text-[10px] font-black text-gray-500 uppercase">Progres</th>
+                                    <th class="px-4 py-2 text-right text-[10px] font-black text-gray-500 uppercase">Total/Sisa</th>
+                                    <th class="px-4 py-2 text-center text-[10px] font-black text-gray-500 uppercase">Jatuh Tempo</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-50">
+                                @forelse($ongoingInstallments as $ci)
+                                    @php
+                                        $x_paid = 0;
+                                        if($ci->jumlah_cicilan > 0) {
+                                            $nom_cicil = $ci->total_harga / $ci->jumlah_cicilan;
+                                            $x_paid = floor($ci->total_dibayar / max(1, $nom_cicil));
+                                        }
+                                    @endphp
+                                    <tr class="hover:bg-gray-50 transition">
+                                        <td class="px-4 py-3">
+                                            <p class="text-xs font-bold text-gray-800">{{ $ci->user->name }}</p>
+                                            <p class="text-[9px] text-gray-400 uppercase font-bold">{{ $ci->nama_event ?? 'Reguler' }}</p>
+                                        </td>
+                                        <td class="px-4 py-3 text-center">
+                                            <span class="px-2 py-0.5 bg-purple-100 text-purple-700 rounded-full text-[9px] font-black">
+                                                {{ $x_paid }}/{{ $ci->jumlah_cicilan }}x
+                                            </span>
+                                        </td>
+                                        <td class="px-4 py-3 text-right">
+                                            <p class="text-[10px] font-bold text-gray-800">Rp {{ number_format($ci->total_harga, 0, ',', '.') }}</p>
+                                            <p class="text-[9px] text-red-500">Sisa: {{ number_format($ci->sisa_tagihan, 0, ',', '.') }}</p>
+                                        </td>
+                                        <td class="px-4 py-3 text-center">
+                                            @php 
+                                                $deadline = \Carbon\Carbon::parse($ci->tenggat_pembayaran);
+                                                $isLate = $deadline->isPast() && !$ci->is_lunas;
+                                            @endphp
+                                            <span class="text-[9px] font-bold {{ $isLate ? 'text-red-600 bg-red-50' : 'text-gray-500 bg-gray-50' }} px-2 py-1 rounded">
+                                                {{ $deadline->format('d/m/y') }}
+                                            </span>
+                                        </td>
+                                    </tr>
+                                @empty
+                                    <tr><td colspan="4" class="px-4 py-10 text-center text-xs text-gray-400">Tidak ada cicilan aktif.</td></tr>
+                                @endforelse
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </div>
@@ -279,9 +325,6 @@
         const revenueLabels = @json($revenueData->pluck('label'));
         const pureRevenueData = @json($revenueData->pluck('pure_revenue'));
 
-        const installmentLabels = @json($installmentData->pluck('label'));
-        const installmentCountData = @json($installmentData->pluck('total_count'));
-
         const chartConfig = (id, label, labels, data, color, isCurrency = true) => {
             return new Chart(document.getElementById(id), {
                 type: 'line',
@@ -311,7 +354,7 @@
                             ticks: {
                                 callback: function(value) {
                                     if (isCurrency) return 'Rp ' + value.toLocaleString();
-                                    return value + ' Pesanan';
+                                    return value;
                                 }
                             }
                         }
@@ -321,7 +364,6 @@
         };
 
         chartConfig('pureRevenueChart', 'Pendapatan Murni', revenueLabels, pureRevenueData, '#2563eb', true);
-        chartConfig('installmentChart', 'Jumlah Cicilan Aktif', installmentLabels, installmentCountData, '#f97316', false);
     </script>
     @endpush
 </x-app-layout>

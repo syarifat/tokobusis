@@ -52,7 +52,7 @@ class LaporanController extends Controller
         $totalTransaksi = $pesanans->count();
         $totalOmzet = $pesanans->sum('total_harga'); // Total nilai barang yang terjual
         $totalPendapatan = $pesanans->sum('total_dibayar'); // Total uang riil yang sudah diterima
-        $totalPiutang = $totalOmzet - $totalPendapatan; // Sisa yang belum dibayar (Bon)
+        $totalPiutang = $pesanans->sum('sisa_tagihan'); // Menggunakan accessor sisa_tagihan yang akurat
 
         return view('admin.laporan.index', compact(
             'pesanans', 'filter', 'title', 'totalTransaksi', 'totalOmzet', 'totalPendapatan', 'totalPiutang'
@@ -93,7 +93,7 @@ class LaporanController extends Controller
         $totalTransaksi = $pesanans->count();
         $totalOmzet = $pesanans->sum('total_harga');
         $totalPendapatan = $pesanans->sum('total_dibayar');
-        $totalPiutang = $totalOmzet - $totalPendapatan;
+        $totalPiutang = $pesanans->sum('sisa_tagihan'); // Menggunakan accessor
 
         // Muat view khusus PDF dan atur ukuran kertas
         $pdf = Pdf::loadView('admin.laporan.pdf', compact(

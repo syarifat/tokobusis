@@ -158,14 +158,14 @@
     @if(isset($topItems) && $topItems->count() > 0)
     <div class="py-16 bg-white">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex flex-col md:flex-row justify-between items-end mb-12">
+            <div class="flex flex-col md:flex-row justify-between items-center md:items-end mb-12 text-center md:text-left gap-4 md:gap-0">
                 <div>
                     <h2 class="text-base text-indigo-600 font-bold tracking-wide uppercase">Paling Dicari</h2>
                     <p class="mt-2 text-3xl leading-8 font-extrabold tracking-tight text-gray-900">
                         Barang Terlaris Bulan Ini
                     </p>
                 </div>
-                <a href="{{ route('pelanggan.dashboard') }}" class="mt-4 md:mt-0 text-indigo-600 font-bold hover:text-indigo-800 transition flex items-center">
+                <a href="{{ route('pelanggan.dashboard') }}" class="text-indigo-600 font-bold hover:text-indigo-800 transition flex items-center bg-indigo-50 md:bg-transparent px-4 py-2 md:p-0 rounded-full md:rounded-none">
                     Lihat Semua <span class="ml-2">&rarr;</span>
                 </a>
             </div>

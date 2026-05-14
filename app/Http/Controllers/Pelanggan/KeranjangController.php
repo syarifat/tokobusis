@@ -24,6 +24,23 @@ class KeranjangController extends Controller
             'qty' => 'required|integer|min:1'
         ]);
 
+        if (!Auth::check()) {
+            $pendingCart = session()->get('pending_cart', []);
+            $found = false;
+            foreach ($pendingCart as &$item) {
+                if ($item['id'] == $request->barang_id) {
+                    $item['qty'] += $request->qty;
+                    $found = true;
+                    break;
+                }
+            }
+            if (!$found) {
+                $pendingCart[] = ['id' => $request->barang_id, 'qty' => $request->qty];
+            }
+            session()->put('pending_cart', $pendingCart);
+            return redirect()->route('login')->with('status', 'Silakan login untuk melanjutkan pesanan Anda.');
+        }
+
         // Cek apakah barang sudah ada di keranjang user ini
         $keranjang = Keranjang::where('user_id', Auth::id())
                               ->where('barang_id', $request->barang_id)
@@ -73,12 +90,30 @@ class KeranjangController extends Controller
 
     public function bulkStore(Request $request)
     {
-        // Validasi input: items sekarang harus berisi array dengan id dan qty
         $request->validate([
             'items' => 'required|array',
             'items.*.id' => 'required|exists:barangs,id',
             'items.*.qty' => 'required|integer|min:1'
         ]);
+
+        if (!Auth::check()) {
+            $pendingCart = session()->get('pending_cart', []);
+            foreach ($request->items as $newItem) {
+                $found = false;
+                foreach ($pendingCart as &$item) {
+                    if ($item['id'] == $newItem['id']) {
+                        $item['qty'] += $newItem['qty'];
+                        $found = true;
+                        break;
+                    }
+                }
+                if (!$found) {
+                    $pendingCart[] = ['id' => $newItem['id'], 'qty' => $newItem['qty']];
+                }
+            }
+            session()->put('pending_cart', $pendingCart);
+            return redirect()->route('login')->with('status', 'Silakan login untuk melanjutkan pesanan Anda.');
+        }
 
         foreach ($request->items as $item) {
             $barangId = $item['id'];

@@ -60,6 +60,10 @@
                             </div>
                             @if($pesanan->jenis_pesanan == 'event')
                             <div>
+                                <p class="text-gray-500">Durasi Cicilan:</p>
+                                <p class="font-semibold">{{ $pesanan->jumlah_cicilan }}x Cicilan</p>
+                            </div>
+                            <div>
                                 <p class="text-gray-500">Tenggat Pelunasan Bon:</p>
                                 <p class="font-semibold text-red-600">{{ \Carbon\Carbon::parse($pesanan->tenggat_pembayaran)->format('d M Y') }}</p>
                             </div>
@@ -112,6 +116,33 @@
                     <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-6 border-t-4 border-indigo-500">
                         <h3 class="font-bold text-lg mb-4">Informasi Tagihan</h3>
                         
+                        @php
+                            $cicilan_sisa = [];
+                            $cicilan_dibayar = 0;
+                            $nominal_per_cicilan = 0;
+                            if ($pesanan->jenis_pesanan == 'event' && $pesanan->jumlah_cicilan > 1) {
+                                $nominal_per_cicilan = round($pesanan->total_harga / $pesanan->jumlah_cicilan);
+                                $akumulasi = 0;
+                                for($i = 1; $i <= $pesanan->jumlah_cicilan; $i++) {
+                                    $tagihan = ($i == $pesanan->jumlah_cicilan) ? ($pesanan->total_harga - $akumulasi) : $nominal_per_cicilan;
+                                    $akumulasi += $tagihan;
+                                    if ($pesanan->total_dibayar >= ($akumulasi - 10)) {
+                                        $cicilan_dibayar++;
+                                    } else {
+                                        $cicilan_sisa[] = ['ke' => $i, 'nominal' => $tagihan];
+                                    }
+                                }
+                            }
+                        @endphp
+
+                        @if($pesanan->jenis_pesanan == 'event' && $pesanan->jumlah_cicilan > 1)
+                            <div class="mb-4 bg-yellow-50 p-3 rounded border border-yellow-200 text-xs">
+                                <p class="font-bold text-yellow-900 mb-1">Progres Cicilan:</p>
+                                <p class="text-yellow-800">Sudah dibayar: <strong>{{ $cicilan_dibayar }} dari {{ $pesanan->jumlah_cicilan }} cicilan</strong>.</p>
+                                <p class="text-yellow-700 mt-1">Nominal per cicilan: Rp {{ number_format($nominal_per_cicilan, 0, ',', '.') }}</p>
+                            </div>
+                        @endif
+
                         <div class="space-y-3 mb-6">
                             <div class="flex justify-between text-sm">
                                 <span class="text-gray-500">Total Tagihan:</span>
@@ -149,14 +180,26 @@
                                 <div class="space-y-3">
                                     <p class="text-xs text-gray-500 italic text-center">*Klik tombol di bawah untuk melakukan pembayaran via Midtrans</p>
                                     
-                                    @if($pesanan->jenis_pesanan == 'event')
+                                    @if($pesanan->jenis_pesanan == 'event' && $pesanan->jumlah_cicilan > 1)
                                         <div class="mt-4">
-                                            <label class="block text-xs font-bold mb-1">Nominal Cicilan (Rp)</label>
-                                            <input type="number" id="nominal_cicilan" class="w-full border-gray-300 rounded text-sm mb-2" placeholder="Masukkan jumlah bayar..." value="{{ $pesanan->total_harga - $pesanan->total_dibayar }}">
+                                            <label class="block text-xs font-bold mb-1">Pilih Pembayaran Cicilan</label>
+                                            <select id="nominal_cicilan" class="w-full border-gray-300 rounded text-sm mb-3 font-bold text-indigo-700 focus:ring-indigo-500">
+                                                @php $sum = 0; @endphp
+                                                @foreach($cicilan_sisa as $index => $c)
+                                                    @php 
+                                                        $sum += $c['nominal']; 
+                                                        $label = ($index == 0) ? 'Cicilan ke-'.$c['ke'] : 'Langsung Cicilan ke-'.$cicilan_sisa[0]['ke'].' s/d ke-'.$c['ke'];
+                                                        if ($c['ke'] == $pesanan->jumlah_cicilan) $label .= ' (Pelunasan Akhir)';
+                                                    @endphp
+                                                    <option value="{{ $sum }}">{{ $label }} - Rp {{ number_format($sum, 0, ',', '.') }}</option>
+                                                @endforeach
+                                            </select>
                                         </div>
+                                    @else
+                                        <input type="hidden" id="nominal_cicilan" value="{{ $pesanan->total_harga - $pesanan->total_dibayar }}">
                                     @endif
 
-                                    <button type="button" id="pay-button" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-4 rounded shadow-lg transition duration-200">
+                                    <button type="button" id="pay-button" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-4 rounded shadow-lg transition duration-200 mt-2">
                                         Bayar Sekarang
                                     </button>
                                 </div>

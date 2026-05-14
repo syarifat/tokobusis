@@ -15,8 +15,12 @@
     <body class="font-sans antialiased text-gray-900 bg-gray-50 selection:bg-indigo-500 selection:text-white">
         <div class="min-h-screen flex flex-col">
             
-            @if(Auth::user()->role === 'admin')
-                @include('layouts.navigation-admin')
+            @if(Auth::check())
+                @if(Auth::user()->role === 'admin')
+                    @include('layouts.navigation-admin')
+                @else
+                    @include('layouts.navigation-pelanggan')
+                @endif
             @else
                 @include('layouts.navigation-pelanggan')
             @endif

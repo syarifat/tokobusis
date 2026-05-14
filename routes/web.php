@@ -47,21 +47,24 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
 });
 
 // Route khusus Pelanggan
-Route::middleware(['auth', 'role:pelanggan'])->prefix('pelanggan')->name('pelanggan.')->group(function () {
+Route::prefix('pelanggan')->name('pelanggan.')->group(function () {
     Route::get('/dashboard', [PelangganDashboard::class, 'index'])->name('dashboard');
-    // Keranjang Belanja
-    Route::get('/keranjang', [KeranjangController::class, 'index'])->name('keranjang.index');
     Route::post('/keranjang/tambah', [KeranjangController::class, 'store'])->name('keranjang.store');
-    Route::put('/keranjang/update/{keranjang}', [KeranjangController::class, 'update'])->name('keranjang.update');
-    Route::delete('/keranjang/hapus/{keranjang}', [KeranjangController::class, 'destroy'])->name('keranjang.destroy');
     Route::post('/keranjang/bulk-store', [KeranjangController::class, 'bulkStore'])->name('keranjang.bulkStore');
-    Route::get('/event', [PelangganEventController::class, 'index'])->name('event.index');
+    
+    Route::middleware(['auth', 'role:pelanggan'])->group(function () {
+        // Keranjang Belanja
+        Route::get('/keranjang', [KeranjangController::class, 'index'])->name('keranjang.index');
+        Route::put('/keranjang/update/{keranjang}', [KeranjangController::class, 'update'])->name('keranjang.update');
+        Route::delete('/keranjang/hapus/{keranjang}', [KeranjangController::class, 'destroy'])->name('keranjang.destroy');
+        Route::get('/event', [PelangganEventController::class, 'index'])->name('event.index');
     Route::post('/event/ajukan', [PelangganEventController::class, 'store'])->name('event.store');
     Route::get('/checkout', [CheckoutController::class, 'index'])->name('checkout.index');
     Route::post('/checkout/proses', [CheckoutController::class, 'process'])->name('checkout.process');
     Route::get('/pesanan', [PelangganPesanan::class, 'index'])->name('pesanan.index');
     Route::get('/pesanan/{pesanan}', [PelangganPesanan::class, 'show'])->name('pesanan.show');
     Route::post('/pesanan/{pesanan}/pay', [PembayaranController::class, 'pay'])->name('pembayaran.pay');
+    });
 });
 
 Route::middleware('auth')->group(function () {

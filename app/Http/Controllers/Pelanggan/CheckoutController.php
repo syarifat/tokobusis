@@ -78,6 +78,7 @@ class CheckoutController extends Controller
             'tanggal_pengantaran' => 'required|date|after_or_equal:today',
             'jenis_pesanan'       => 'required|in:reguler,event',
             'event_id'            => 'required_if:jenis_pesanan,event',
+            'jumlah_cicilan'      => 'required_if:jenis_pesanan,event|in:1,3,6',
             'metode_pengiriman'   => 'required|in:diantar,ambil_sendiri',
             'tipe_pembayaran'     => 'required|in:transfer,cash',
             'latitude'            => 'nullable|string', // Validasi Maps Baru
@@ -132,7 +133,8 @@ class CheckoutController extends Controller
             }
             $dataPesanan['nama_event'] = $event->nama_acara;
             $dataPesanan['tanggal_acara'] = $event->tanggal_acara;
-            $dataPesanan['tenggat_pembayaran'] = Carbon::parse($event->tanggal_acara)->addDays(7);
+            $dataPesanan['tenggat_pembayaran'] = Carbon::parse($event->tanggal_acara)->addMonths(1);
+            $dataPesanan['jumlah_cicilan'] = $request->jumlah_cicilan;
         }
 
         // 1. Simpan ke database

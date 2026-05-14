@@ -77,6 +77,33 @@
                     <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
                         <h3 class="text-lg font-bold text-gray-900 border-b pb-2 mb-4">Ringkasan Tagihan</h3>
                         
+                        @php
+                            $cicilan_sisa = [];
+                            $cicilan_dibayar = 0;
+                            $nominal_per_cicilan = 0;
+                            if ($pesanan->jenis_pesanan == 'event' && $pesanan->jumlah_cicilan > 1) {
+                                $nominal_per_cicilan = round($pesanan->total_harga / $pesanan->jumlah_cicilan);
+                                $akumulasi = 0;
+                                for($i = 1; $i <= $pesanan->jumlah_cicilan; $i++) {
+                                    $tagihan = ($i == $pesanan->jumlah_cicilan) ? ($pesanan->total_harga - $akumulasi) : $nominal_per_cicilan;
+                                    $akumulasi += $tagihan;
+                                    if ($pesanan->total_dibayar >= ($akumulasi - 10)) {
+                                        $cicilan_dibayar++;
+                                    } else {
+                                        $cicilan_sisa[] = ['ke' => $i, 'nominal' => $tagihan];
+                                    }
+                                }
+                            }
+                        @endphp
+
+                        @if($pesanan->jenis_pesanan == 'event' && $pesanan->jumlah_cicilan > 1)
+                            <div class="mb-4 bg-purple-50 p-3 rounded-lg border border-purple-100 text-xs">
+                                <p class="font-bold text-purple-900 mb-1">Progres Cicilan:</p>
+                                <p class="text-purple-800">Sudah dibayar: <strong>{{ $cicilan_dibayar }} dari {{ $pesanan->jumlah_cicilan }} cicilan</strong>.</p>
+                                <p class="text-purple-700 mt-1">Nominal per cicilan: Rp {{ number_format($nominal_per_cicilan, 0, ',', '.') }}</p>
+                            </div>
+                        @endif
+
                         <div class="space-y-3 text-sm mb-6">
                             <div class="flex justify-between">
                                 <span class="text-gray-500">Total Tagihan</span>
@@ -125,6 +152,7 @@
                         <div class="space-y-2 text-sm text-purple-800">
                             <p><strong>Nama Acara:</strong> {{ $pesanan->nama_event }}</p>
                             <p><strong>Tgl Acara:</strong> {{ \Carbon\Carbon::parse($pesanan->tanggal_acara)->format('d F Y') }}</p>
+                            <p><strong>Durasi Cicilan:</strong> {{ $pesanan->jumlah_cicilan }}x Cicilan</p>
                             <p class="text-red-600 mt-2"><strong>Jatuh Tempo:</strong> {{ \Carbon\Carbon::parse($pesanan->tenggat_pembayaran)->format('d F Y') }}</p>
                         </div>
                     </div>
@@ -204,10 +232,28 @@
                                     <h4 class="text-sm font-bold text-blue-900 mb-2">Terima Pembayaran Tunai</h4>
                                     <p class="text-xs text-blue-700 mb-3">Pesanan ini menggunakan metode Cash. Masukkan nominal uang yang diterima dari pelanggan (Kasir/Kurir).</p>
                                     
-                                    <form action="{{ route('admin.pesanan.bayarTunai', $pesanan->id) }}" method="POST" class="flex gap-2">
+                                    <form action="{{ route('admin.pesanan.bayarTunai', $pesanan->id) }}" method="POST" class="flex flex-col gap-2">
                                         @csrf
-                                        <input type="number" name="nominal" class="flex-1 rounded-md border-gray-300 text-sm focus:ring-blue-500" value="{{ $pesanan->total_harga - $pesanan->total_dibayar }}" min="1" max="{{ $pesanan->total_harga - $pesanan->total_dibayar }}" required>
-                                        <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-bold transition">Catat Bayar</button>
+                                        @if($pesanan->jenis_pesanan == 'event' && $pesanan->jumlah_cicilan > 1)
+                                            <label class="block text-xs font-bold text-blue-900 mb-1">Pilih Pembayaran Cicilan</label>
+                                            <select name="nominal" class="w-full border-blue-300 rounded-md text-sm font-bold text-indigo-700 focus:ring-blue-500">
+                                                @php $sum = 0; @endphp
+                                                @foreach($cicilan_sisa as $index => $c)
+                                                    @php 
+                                                        $sum += $c['nominal']; 
+                                                        $label = ($index == 0) ? 'Cicilan ke-'.$c['ke'] : 'Langsung Cicilan ke-'.$cicilan_sisa[0]['ke'].' s/d ke-'.$c['ke'];
+                                                        if ($c['ke'] == $pesanan->jumlah_cicilan) $label .= ' (Pelunasan Akhir)';
+                                                    @endphp
+                                                    <option value="{{ $sum }}">{{ $label }} - Rp {{ number_format($sum, 0, ',', '.') }}</option>
+                                                @endforeach
+                                            </select>
+                                            <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 mt-2 rounded-md text-sm font-bold transition">Catat Bayar Tunai</button>
+                                        @else
+                                            <div class="flex gap-2">
+                                                <input type="number" name="nominal" class="flex-1 rounded-md border-gray-300 text-sm focus:ring-blue-500" value="{{ $pesanan->total_harga - $pesanan->total_dibayar }}" min="1" max="{{ $pesanan->total_harga - $pesanan->total_dibayar }}" required>
+                                                <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-bold transition">Catat Bayar</button>
+                                            </div>
+                                        @endif
                                     </form>
                                 </div>
                             @endif

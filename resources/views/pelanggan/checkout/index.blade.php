@@ -16,6 +16,7 @@
                       jenis: 'reguler', 
                       pengiriman: 'diantar', 
                       pembayaran: 'transfer',
+                      cicilan: 1,
                       subtotal: {{ $subtotal }},
                       ongkirDasar: {{ $ongkir }},
                       batasGratis: {{ $batasGratisOngkir }},
@@ -29,6 +30,9 @@
                       },
                       get grandTotal() {
                           return this.subtotal + this.ongkirAktif;
+                      },
+                      get cicilanPerBulan() {
+                          return this.grandTotal / this.cicilan;
                       },
                       getLocation() {
                           this.locating = true;
@@ -189,12 +193,32 @@
                                         </div>
                                     </label>
 
-                                    <div x-show="jenis == 'event'" class="mt-2 p-4 bg-yellow-50 rounded-lg border border-yellow-200 flex items-start gap-3">
-                                        <svg class="w-5 h-5 text-yellow-600 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>
-                                        <div class="w-full">
-                                            @php $activeEvent = $eventsDisetujui->first(); @endphp
-                                            <p class="font-bold text-yellow-900 text-sm">Target Bon: {{ $activeEvent->nama_acara }}</p>
-                                            <input type="hidden" name="event_id" value="{{ $activeEvent->id }}">
+                                    <div x-show="jenis == 'event'" class="mt-2 p-4 bg-yellow-50 rounded-lg border border-yellow-200 flex flex-col gap-3">
+                                        <div class="flex items-start gap-3">
+                                            <svg class="w-5 h-5 text-yellow-600 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>
+                                            <div class="w-full">
+                                                @php $activeEvent = $eventsDisetujui->first(); @endphp
+                                                <p class="font-bold text-yellow-900 text-sm">Target Bon: {{ $activeEvent->nama_acara }}</p>
+                                                <p class="text-xs text-yellow-700 mt-1">Tenggat pembayaran maksimal 1 bulan setelah tanggal acara ({{ \Carbon\Carbon::parse($activeEvent->tanggal_acara)->addMonths(1)->format('d M Y') }}).</p>
+                                                <input type="hidden" name="event_id" value="{{ $activeEvent->id }}">
+                                            </div>
+                                        </div>
+                                        <div class="mt-2 pt-3 border-t border-yellow-200">
+                                            <label class="block text-yellow-900 text-sm font-bold mb-2">Pilih Durasi Cicilan</label>
+                                            <div class="grid grid-cols-3 gap-2">
+                                                <label class="text-center p-2 border rounded-lg cursor-pointer transition" :class="cicilan == 1 ? 'border-yellow-500 bg-yellow-100 font-bold' : 'border-yellow-300 bg-white hover:bg-yellow-50'">
+                                                    <input type="radio" name="jumlah_cicilan" value="1" x-model.number="cicilan" class="hidden">
+                                                    <span class="block text-sm text-yellow-900">1x (Lunas)</span>
+                                                </label>
+                                                <label class="text-center p-2 border rounded-lg cursor-pointer transition" :class="cicilan == 3 ? 'border-yellow-500 bg-yellow-100 font-bold' : 'border-yellow-300 bg-white hover:bg-yellow-50'">
+                                                    <input type="radio" name="jumlah_cicilan" value="3" x-model.number="cicilan" class="hidden">
+                                                    <span class="block text-sm text-yellow-900">3x Cicilan</span>
+                                                </label>
+                                                <label class="text-center p-2 border rounded-lg cursor-pointer transition" :class="cicilan == 6 ? 'border-yellow-500 bg-yellow-100 font-bold' : 'border-yellow-300 bg-white hover:bg-yellow-50'">
+                                                    <input type="radio" name="jumlah_cicilan" value="6" x-model.number="cicilan" class="hidden">
+                                                    <span class="block text-sm text-yellow-900">6x Cicilan</span>
+                                                </label>
+                                            </div>
                                         </div>
                                     </div>
                                 @endif
@@ -302,6 +326,10 @@
                                 <div class="flex justify-between items-center">
                                     <span class="text-base font-bold text-gray-900">Total Tagihan</span>
                                     <span class="text-xl font-black text-indigo-600">Rp <span x-text="new Intl.NumberFormat('id-ID').format(grandTotal)"></span></span>
+                                </div>
+                                <div x-show="jenis == 'event' && cicilan > 1" class="flex justify-between items-center mt-3 bg-yellow-50 p-3 rounded-lg border border-yellow-200">
+                                    <span class="text-sm font-bold text-yellow-800">Rincian per Cicilan</span>
+                                    <span class="text-base font-black text-yellow-900">Rp <span x-text="new Intl.NumberFormat('id-ID').format(Math.round(cicilanPerBulan))"></span> <span class="text-xs font-normal">/ cicilan</span></span>
                                 </div>
                             </div>
 

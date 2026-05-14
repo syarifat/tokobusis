@@ -32,6 +32,7 @@
                                     <a href="{{ route('pelanggan.dashboard') }}" class="font-bold text-indigo-600 hover:text-indigo-800 transition">Mulai Belanja &rarr;</a>
                                 @endif
                             @else
+                                <a href="{{ route('pelanggan.dashboard') }}" class="font-bold text-indigo-600 hover:text-indigo-800 transition">Lihat Katalog</a>
                                 <a href="{{ route('login') }}" class="font-semibold text-gray-600 hover:text-gray-900 transition">Masuk</a>
                                 @if (Route::has('register'))
                                     <a href="{{ route('register') }}" class="font-bold bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition shadow-md">Daftar Sekarang</a>
@@ -66,15 +67,21 @@
                                         Masuk ke Toko
                                     </a>
                                 @else
-                                    <a href="{{ route('register') }}" class="w-full flex items-center justify-center px-8 py-3 border border-transparent text-base font-bold rounded-lg text-white bg-indigo-600 hover:bg-indigo-700 md:py-4 md:text-lg transition">
-                                        Daftar & Belanja
+                                    <a href="{{ route('pelanggan.dashboard') }}" class="w-full flex items-center justify-center px-8 py-3 border border-transparent text-base font-bold rounded-lg text-white bg-indigo-600 hover:bg-indigo-700 md:py-4 md:text-lg transition">
+                                        Lihat Katalog
                                     </a>
                                 @endauth
                             </div>
                             <div class="mt-3 sm:mt-0">
+                                @guest
+                                <a href="{{ route('register') }}" class="w-full flex items-center justify-center px-8 py-3 border border-gray-300 text-base font-bold rounded-lg text-gray-700 bg-white hover:bg-gray-50 md:py-4 md:text-lg transition">
+                                    Daftar Sekarang
+                                </a>
+                                @else
                                 <a href="#fitur" class="w-full flex items-center justify-center px-8 py-3 border border-gray-300 text-base font-bold rounded-lg text-gray-700 bg-white hover:bg-gray-50 md:py-4 md:text-lg transition">
                                     Pelajari Fitur
                                 </a>
+                                @endguest
                             </div>
                         </div>
                     </div>
@@ -154,13 +161,16 @@
                 <span class="block text-indigo-200">Daftar sekarang dan nikmati kemudahannya.</span>
             </h2>
             <div class="mt-8 flex lg:mt-0 lg:flex-shrink-0 gap-3">
-                <div class="inline-flex rounded-md shadow">
+                <div class="inline-flex rounded-md shadow gap-3">
                     @auth
                         <a href="{{ Auth::user()->role === 'admin' ? route('admin.dashboard') : route('pelanggan.dashboard') }}" class="inline-flex items-center justify-center px-5 py-3 border border-transparent text-base font-bold rounded-md text-indigo-600 bg-white hover:bg-indigo-50 transition">
                             Masuk Dashboard
                         </a>
                     @else
-                        <a href="{{ route('register') }}" class="inline-flex items-center justify-center px-5 py-3 border border-transparent text-base font-bold rounded-md text-indigo-600 bg-white hover:bg-indigo-50 transition">
+                        <a href="{{ route('pelanggan.dashboard') }}" class="inline-flex items-center justify-center px-5 py-3 border border-transparent text-base font-bold rounded-md text-indigo-600 bg-white hover:bg-indigo-50 transition">
+                            Lihat Katalog
+                        </a>
+                        <a href="{{ route('register') }}" class="inline-flex items-center justify-center px-5 py-3 border border-transparent text-base font-bold rounded-md text-white bg-indigo-500 hover:bg-indigo-400 transition">
                             Buat Akun Gratis
                         </a>
                     @endauth

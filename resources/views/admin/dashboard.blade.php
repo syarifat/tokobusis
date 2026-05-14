@@ -129,7 +129,7 @@
                                     </tr>
                                 @empty
                                     <tr><td colspan="3" class="p-6 text-center text-gray-500">Tidak ada data.</td></tr>
-                                @@endforelse
+                                @endforelse
                             </tbody>
                         </table>
                     </div>
@@ -167,7 +167,7 @@
                                     </tr>
                                 @empty
                                     <tr><td colspan="3" class="p-6 text-center text-gray-500">Tidak ada data.</td></tr>
-                                @@endforelse
+                                @endforelse
                             </tbody>
                         </table>
                     </div>
@@ -217,7 +217,7 @@
                                     </tr>
                                 @empty
                                     <tr><td colspan="4" class="px-6 py-10 text-center text-gray-500">Belum ada pesanan masuk.</td></tr>
-                                @forelse
+                                @endforelse
                             </tbody>
                         </table>
                     </div>

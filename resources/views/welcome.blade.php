@@ -229,9 +229,9 @@
                 <div class="rounded-2xl overflow-hidden shadow-md relative group h-48 md:h-auto">
                     <img src="{{ asset('img_landing/4.jpg') }}" alt="Galeri 4" class="w-full h-full object-cover transform group-hover:scale-105 transition duration-500">
                 </div>
-                <!-- <div class="rounded-2xl overflow-hidden shadow-md relative group h-48 md:h-auto">
+                <div class="rounded-2xl overflow-hidden shadow-md relative group h-48 md:h-auto">
                     <img src="{{ asset('img_landing/5.jpg') }}" alt="Galeri 5" class="w-full h-full object-cover transform group-hover:scale-105 transition duration-500">
-                </div> -->
+                </div>
             </div>
         </div>
     </div>

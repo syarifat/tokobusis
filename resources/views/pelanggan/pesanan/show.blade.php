@@ -113,6 +113,18 @@
                 </div>
 
                 <div class="md:col-span-1 space-y-6">
+                    @if($pesanan->hitungDenda() > 0)
+                        <div class="bg-red-50 border-l-4 border-red-500 p-4 rounded shadow-sm">
+                            <div class="flex items-start">
+                                <svg class="w-5 h-5 text-red-500 mr-2 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path></svg>
+                                <div>
+                                    <h3 class="text-sm font-bold text-red-800">Denda Keterlambatan</h3>
+                                    <p class="text-xs text-red-700 mt-1">Pesanan ini telah melewati tenggat pembayaran selama <strong>{{ $pesanan->getMonthsOverdue() }} bulan</strong>. Dikenakan denda sebesar 10% per bulan dari sisa pokok tagihan.</p>
+                                </div>
+                            </div>
+                        </div>
+                    @endif
+
                     <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-6 border-t-4 border-indigo-500">
                         <h3 class="font-bold text-lg mb-4">Informasi Tagihan</h3>
                         
@@ -145,16 +157,22 @@
 
                         <div class="space-y-3 mb-6">
                             <div class="flex justify-between text-sm">
-                                <span class="text-gray-500">Total Tagihan:</span>
+                                <span class="text-gray-500">Total Pokok Tagihan:</span>
                                 <span class="font-bold">Rp {{ number_format($pesanan->total_harga, 0, ',', '.') }}</span>
                             </div>
+                            @if($pesanan->hitungDenda() > 0)
+                            <div class="flex justify-between text-sm text-red-600">
+                                <span>Denda Keterlambatan:</span>
+                                <span class="font-bold">+ Rp {{ number_format($pesanan->hitungDenda(), 0, ',', '.') }}</span>
+                            </div>
+                            @endif
                             <div class="flex justify-between text-sm">
                                 <span class="text-gray-500">Sudah Dibayar:</span>
                                 <span class="font-bold text-green-600">Rp {{ number_format($pesanan->total_dibayar, 0, ',', '.') }}</span>
                             </div>
                             <div class="flex justify-between text-sm border-t pt-2">
                                 <span class="font-bold">Sisa Tagihan:</span>
-                                <span class="font-bold text-red-600" id="sisa-tagihan-val">Rp {{ number_format($pesanan->total_harga - $pesanan->total_dibayar, 0, ',', '.') }}</span>
+                                <span class="font-bold text-red-600" id="sisa-tagihan-val">Rp {{ number_format(($pesanan->total_harga + $pesanan->hitungDenda()) - $pesanan->total_dibayar, 0, ',', '.') }}</span>
                             </div>
                         </div>
 
@@ -184,19 +202,24 @@
                                         <div class="mt-4">
                                             <label class="block text-xs font-bold mb-1">Pilih Pembayaran Cicilan</label>
                                             <select id="nominal_cicilan" class="w-full border-gray-300 rounded text-sm mb-3 font-bold text-indigo-700 focus:ring-indigo-500">
-                                                @php $sum = 0; @endphp
+                                                @php $sum = 0; $denda = $pesanan->hitungDenda(); @endphp
                                                 @foreach($cicilan_sisa as $index => $c)
                                                     @php 
                                                         $sum += $c['nominal']; 
+                                                        $isLast = ($c['ke'] == $pesanan->jumlah_cicilan);
                                                         $label = ($index == 0) ? 'Cicilan ke-'.$c['ke'] : 'Langsung Cicilan ke-'.$cicilan_sisa[0]['ke'].' s/d ke-'.$c['ke'];
-                                                        if ($c['ke'] == $pesanan->jumlah_cicilan) $label .= ' (Pelunasan Akhir)';
+                                                        if ($isLast) {
+                                                            if ($denda > 0) $label .= ' (+ Denda)';
+                                                            $label .= ' (Pelunasan Akhir)';
+                                                            $sum += $denda;
+                                                        }
                                                     @endphp
                                                     <option value="{{ $sum }}">{{ $label }} - Rp {{ number_format($sum, 0, ',', '.') }}</option>
                                                 @endforeach
                                             </select>
                                         </div>
                                     @else
-                                        <input type="hidden" id="nominal_cicilan" value="{{ $pesanan->total_harga - $pesanan->total_dibayar }}">
+                                        <input type="hidden" id="nominal_cicilan" value="{{ ($pesanan->total_harga + $pesanan->hitungDenda()) - $pesanan->total_dibayar }}">
                                     @endif
 
                                     <button type="button" id="pay-button" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-4 rounded shadow-lg transition duration-200 mt-2">
@@ -239,7 +262,7 @@
                 if (payButton) {
                     payButton.addEventListener('click', function () {
                         const inputNominal = document.getElementById('nominal_cicilan');
-                        const sisaTagihan = {{ $pesanan->total_harga - $pesanan->total_dibayar }};
+                        const sisaTagihan = {{ ($pesanan->total_harga + $pesanan->hitungDenda()) - $pesanan->total_dibayar }};
                         const nominal = inputNominal ? parseInt(inputNominal.value) : sisaTagihan;
 
                         if (!nominal || nominal < 1000) {

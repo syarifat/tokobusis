@@ -48,9 +48,43 @@ class Pesanan extends Model
         return $this->hasMany(PesananItem::class);
     }
 
-    // Relasi: Satu pesanan bisa dicicil berkali-kali (punya banyak riwayat pembayaran)
     public function pembayarans()
     {
         return $this->hasMany(Pembayaran::class);
+    }
+
+    // Hitung berapa bulan keterlambatan
+    public function getMonthsOverdue()
+    {
+        if ($this->status_pembayaran === 'lunas' || $this->jenis_pesanan !== 'event' || !$this->tenggat_pembayaran) {
+            return 0;
+        }
+
+        $tenggat = \Carbon\Carbon::parse($this->tenggat_pembayaran)->startOfDay();
+        $sekarang = now()->startOfDay();
+
+        $daysOverdue = $tenggat->diffInDays($sekarang, false);
+
+        if ($daysOverdue <= 0) {
+            return 0;
+        }
+
+        return ceil($daysOverdue / 30);
+    }
+
+    // Hitung nominal denda (10% per bulan dari sisa tagihan)
+    public function hitungDenda()
+    {
+        $monthsOverdue = $this->getMonthsOverdue();
+        if ($monthsOverdue <= 0) {
+            return 0;
+        }
+
+        $sisa = $this->total_harga - $this->total_dibayar;
+        if ($sisa <= 0) {
+            return 0;
+        }
+
+        return $sisa * 0.10 * $monthsOverdue;
     }
 }

@@ -17,6 +17,18 @@
                 
                 <div class="md:col-span-1 space-y-6">
                     
+                    @if($pesanan->hitungDenda() > 0)
+                        <div class="bg-red-50 border-l-4 border-red-500 p-4 rounded-xl shadow-sm border-r border-t border-b border-red-100">
+                            <div class="flex items-start">
+                                <svg class="w-5 h-5 text-red-500 mr-2 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path></svg>
+                                <div>
+                                    <h3 class="text-sm font-bold text-red-800">Pesanan Menunggak!</h3>
+                                    <p class="text-xs text-red-700 mt-1">Pesanan ini telah melewati tenggat pembayaran selama <strong>{{ $pesanan->getMonthsOverdue() }} bulan</strong>. Dikenakan denda sebesar 10% per bulan dari sisa pokok tagihan.</p>
+                                </div>
+                            </div>
+                        </div>
+                    @endif
+
                     <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
                         <h3 class="text-lg font-bold text-gray-900 border-b pb-2 mb-4">Informasi Pelanggan</h3>
                         <div class="space-y-3 text-sm">
@@ -106,16 +118,22 @@
 
                         <div class="space-y-3 text-sm mb-6">
                             <div class="flex justify-between">
-                                <span class="text-gray-500">Total Tagihan</span>
+                                <span class="text-gray-500">Total Pokok Tagihan</span>
                                 <span class="font-bold">Rp {{ number_format($pesanan->total_harga, 0, ',', '.') }}</span>
                             </div>
+                            @if($pesanan->hitungDenda() > 0)
+                            <div class="flex justify-between text-red-600">
+                                <span>Denda Keterlambatan</span>
+                                <span class="font-bold">+ Rp {{ number_format($pesanan->hitungDenda(), 0, ',', '.') }}</span>
+                            </div>
+                            @endif
                             <div class="flex justify-between">
                                 <span class="text-gray-500">Sudah Dibayar</span>
                                 <span class="font-bold text-green-600">Rp {{ number_format($pesanan->total_dibayar, 0, ',', '.') }}</span>
                             </div>
                             <div class="flex justify-between border-t pt-2 mt-2">
                                 <span class="font-bold text-gray-800">Sisa Tagihan</span>
-                                <span class="font-black text-red-600">Rp {{ number_format($pesanan->total_harga - $pesanan->total_dibayar, 0, ',', '.') }}</span>
+                                <span class="font-black text-red-600">Rp {{ number_format(($pesanan->total_harga + $pesanan->hitungDenda()) - $pesanan->total_dibayar, 0, ',', '.') }}</span>
                             </div>
                         </div>
 
@@ -212,9 +230,15 @@
                                 </div>
                             </div>
                         </div>
+                        @if($pesanan->hitungDenda() > 0)
+                        <div class="px-6 py-3 border-t border-red-100 flex justify-between items-center bg-red-50 text-red-600 text-sm">
+                            <span class="font-bold">Total Denda Keterlambatan</span>
+                            <span class="font-bold">+ Rp {{ number_format($pesanan->hitungDenda(), 0, ',', '.') }}</span>
+                        </div>
+                        @endif
                         <div class="bg-gray-50 px-6 py-4 border-t border-gray-100 flex justify-between items-center">
                             <span class="text-gray-500 font-bold uppercase text-sm">Total Keseluruhan</span>
-                            <span class="text-xl font-black text-gray-900">Rp {{ number_format($pesanan->total_harga, 0, ',', '.') }}</span>
+                            <span class="text-xl font-black text-gray-900">Rp {{ number_format($pesanan->total_harga + $pesanan->hitungDenda(), 0, ',', '.') }}</span>
                         </div>
                     </div>
 
@@ -237,12 +261,17 @@
                                         @if($pesanan->jenis_pesanan == 'event' && $pesanan->jumlah_cicilan > 1)
                                             <label class="block text-xs font-bold text-blue-900 mb-1">Pilih Pembayaran Cicilan</label>
                                             <select name="nominal" class="w-full border-blue-300 rounded-md text-sm font-bold text-indigo-700 focus:ring-blue-500">
-                                                @php $sum = 0; @endphp
+                                                @php $sum = 0; $denda = $pesanan->hitungDenda(); @endphp
                                                 @foreach($cicilan_sisa as $index => $c)
                                                     @php 
                                                         $sum += $c['nominal']; 
+                                                        $isLast = ($c['ke'] == $pesanan->jumlah_cicilan);
                                                         $label = ($index == 0) ? 'Cicilan ke-'.$c['ke'] : 'Langsung Cicilan ke-'.$cicilan_sisa[0]['ke'].' s/d ke-'.$c['ke'];
-                                                        if ($c['ke'] == $pesanan->jumlah_cicilan) $label .= ' (Pelunasan Akhir)';
+                                                        if ($isLast) {
+                                                            if ($denda > 0) $label .= ' (+ Denda)';
+                                                            $label .= ' (Pelunasan Akhir)';
+                                                            $sum += $denda;
+                                                        }
                                                     @endphp
                                                     <option value="{{ $sum }}">{{ $label }} - Rp {{ number_format($sum, 0, ',', '.') }}</option>
                                                 @endforeach
@@ -250,7 +279,8 @@
                                             <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 mt-2 rounded-md text-sm font-bold transition">Catat Bayar Tunai</button>
                                         @else
                                             <div class="flex gap-2">
-                                                <input type="number" name="nominal" class="flex-1 rounded-md border-gray-300 text-sm focus:ring-blue-500" value="{{ $pesanan->total_harga - $pesanan->total_dibayar }}" min="1" max="{{ $pesanan->total_harga - $pesanan->total_dibayar }}" required>
+                                                @php $sisaAkhir = ($pesanan->total_harga + $pesanan->hitungDenda()) - $pesanan->total_dibayar; @endphp
+                                                <input type="number" name="nominal" class="flex-1 rounded-md border-gray-300 text-sm focus:ring-blue-500" value="{{ $sisaAkhir }}" min="1" max="{{ $sisaAkhir }}" required>
                                                 <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-bold transition">Catat Bayar</button>
                                             </div>
                                         @endif

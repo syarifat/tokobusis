@@ -154,6 +154,127 @@
         </div>
     </div>
 
+    {{-- Top 3 Barang Terlaris --}}
+    @if(isset($topItems) && $topItems->count() > 0)
+    <div class="py-16 bg-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex flex-col md:flex-row justify-between items-end mb-12">
+                <div>
+                    <h2 class="text-base text-indigo-600 font-bold tracking-wide uppercase">Paling Dicari</h2>
+                    <p class="mt-2 text-3xl leading-8 font-extrabold tracking-tight text-gray-900">
+                        Barang Terlaris Bulan Ini
+                    </p>
+                </div>
+                <a href="{{ route('pelanggan.dashboard') }}" class="mt-4 md:mt-0 text-indigo-600 font-bold hover:text-indigo-800 transition flex items-center">
+                    Lihat Semua <span class="ml-2">&rarr;</span>
+                </a>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+                @foreach($topItems as $index => $item)
+                <div class="group bg-white border border-gray-100 rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 relative">
+                    <div class="absolute top-4 left-4 bg-orange-500 text-white text-xs font-black px-3 py-1.5 rounded-full z-10 shadow-md">
+                        #{{ $index + 1 }} Terlaris
+                    </div>
+                    <div class="aspect-w-4 aspect-h-3 bg-gray-200 relative overflow-hidden group-hover:opacity-90 transition h-64">
+                        @if($item->gambar)
+                            <img src="{{ asset('storage/'.$item->gambar) }}" alt="{{ $item->nama_barang }}" class="w-full h-full object-cover">
+                        @else
+                            <div class="w-full h-full flex flex-col items-center justify-center text-gray-400 bg-gray-50">
+                                <svg class="w-12 h-12 mb-2 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                            </div>
+                        @endif
+                    </div>
+                    <div class="p-6">
+                        <div class="flex justify-between items-start mb-2">
+                            <h3 class="text-xl font-bold text-gray-900 line-clamp-1 group-hover:text-indigo-600 transition">{{ $item->nama_barang }}</h3>
+                        </div>
+                        <p class="text-gray-500 text-sm line-clamp-2 mb-4">{{ $item->deskripsi ?? 'Kualitas terbaik untuk kebutuhan sehari-hari.' }}</p>
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-2xl font-black text-indigo-600">Rp {{ number_format($item->harga, 0, ',', '.') }}<span class="text-sm font-normal text-gray-500">/{{ $item->satuan }}</span></p>
+                            </div>
+                            <span class="text-xs font-semibold text-gray-500 bg-gray-100 px-2 py-1 rounded">Terjual: {{ $item->pesanan_items_sum_qty ?? 0 }}</span>
+                        </div>
+                    </div>
+                </div>
+                @endforeach
+            </div>
+        </div>
+    </div>
+    @endif
+
+    {{-- Galeri Toko --}}
+    <div class="py-16 bg-gray-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-12">
+                <h2 class="text-base text-indigo-600 font-bold tracking-wide uppercase">Galeri Kami</h2>
+                <p class="mt-2 text-3xl leading-8 font-extrabold tracking-tight text-gray-900 sm:text-4xl">
+                    Potret Toko Bu Sis
+                </p>
+                <p class="mt-4 max-w-2xl text-xl text-gray-500 mx-auto">Melayani dengan sepenuh hati, menyediakan produk segar dan berkualitas setiap hari.</p>
+            </div>
+
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div class="col-span-2 row-span-2 rounded-2xl overflow-hidden shadow-md relative group">
+                    <img src="{{ asset('img_landing/1.jpg') }}" alt="Galeri 1" class="w-full h-full object-cover transform group-hover:scale-105 transition duration-500">
+                    <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition duration-300"></div>
+                </div>
+                <div class="rounded-2xl overflow-hidden shadow-md relative group h-48 md:h-auto">
+                    <img src="{{ asset('img_landing/2.jpg') }}" alt="Galeri 2" class="w-full h-full object-cover transform group-hover:scale-105 transition duration-500">
+                </div>
+                <div class="rounded-2xl overflow-hidden shadow-md relative group h-48 md:h-auto">
+                    <img src="{{ asset('img_landing/3.jpg') }}" alt="Galeri 3" class="w-full h-full object-cover transform group-hover:scale-105 transition duration-500">
+                </div>
+                <div class="rounded-2xl overflow-hidden shadow-md relative group h-48 md:h-auto">
+                    <img src="{{ asset('img_landing/4.jpg') }}" alt="Galeri 4" class="w-full h-full object-cover transform group-hover:scale-105 transition duration-500">
+                </div>
+                <div class="rounded-2xl overflow-hidden shadow-md relative group h-48 md:h-auto">
+                    <img src="{{ asset('img_landing/5.jpg') }}" alt="Galeri 5" class="w-full h-full object-cover transform group-hover:scale-105 transition duration-500">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {{-- Lokasi Toko --}}
+    <div class="py-16 bg-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="bg-indigo-50 rounded-3xl overflow-hidden shadow-lg border border-indigo-100 flex flex-col md:flex-row">
+                <div class="w-full md:w-1/2 p-10 lg:p-16 flex flex-col justify-center">
+                    <h2 class="text-base text-indigo-600 font-bold tracking-wide uppercase mb-2">Kunjungi Kami</h2>
+                    <h3 class="text-3xl font-extrabold text-gray-900 mb-4">Lokasi Toko Bu Sis</h3>
+                    <p class="text-gray-600 mb-6 leading-relaxed">
+                        Kami buka setiap hari untuk memenuhi kebutuhan harian Anda. Jangan ragu untuk mampir langsung ke toko kami atau klik tombol di bawah untuk melihat rute via Google Maps.
+                    </p>
+                    
+                    <div class="flex items-center text-gray-700 mb-8 bg-white p-4 rounded-xl shadow-sm inline-block">
+                        <svg class="w-6 h-6 text-indigo-600 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                        <span class="font-medium">Tulungagung, Jawa Timur</span>
+                    </div>
+
+                    <div>
+                        <a href="https://maps.app.goo.gl/8ki6XN8zUaKKWfS69?g_st=aw" target="_blank" class="inline-flex items-center px-6 py-3 border border-transparent text-base font-bold rounded-lg text-white bg-indigo-600 hover:bg-indigo-700 transition shadow-md hover:shadow-lg">
+                            <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
+                            </svg>
+                            Buka di Google Maps
+                        </a>
+                    </div>
+                </div>
+                <div class="w-full md:w-1/2 h-64 md:h-auto min-h-[400px] relative">
+                    {{-- Iframe Google Maps (Menggunakan koordinat default/umum untuk preview, link tombol menuju URL spesifik) --}}
+                    <iframe 
+                        src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d126438.2854809817!2d111.82424074213198!3d-8.064507026721021!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x2e78e2e2a33dbd4b%3A0xc62b460c50005d5f!2sTulungagung%2C%20Tulungagung%20Regency%2C%20East%20Java!5e0!3m2!1sen!2sid!4v1715690835474!5m2!1sen!2sid" 
+                        class="absolute inset-0 w-full h-full border-0" 
+                        allowfullscreen="" 
+                        loading="lazy" 
+                        referrerpolicy="no-referrer-when-downgrade">
+                    </iframe>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div class="bg-indigo-700">
         <div class="max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:py-16 lg:px-8 lg:flex lg:items-center lg:justify-between">
             <h2 class="text-3xl font-extrabold tracking-tight text-white sm:text-4xl">

@@ -22,7 +22,12 @@ use App\Http\Controllers\Pelanggan\PembayaranController;
 use App\Services\FonnteService;
 
 Route::get('/', function () {
-    return view('welcome');
+    $topItems = \App\Models\Barang::withSum('pesanan_items', 'qty')
+        ->orderByDesc('pesanan_items_sum_qty')
+        ->take(3)
+        ->get();
+        
+    return view('welcome', compact('topItems'));
 });
 
 // Route khusus Admin

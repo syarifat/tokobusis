@@ -327,19 +327,16 @@
 
         const chartConfig = (id, label, labels, data, color, isCurrency = true) => {
             return new Chart(document.getElementById(id), {
-                type: 'line',
+                type: 'bar',
                 data: {
                     labels: labels,
                     datasets: [{
                         label: label,
                         data: data,
+                        backgroundColor: color + 'CC', // 80% opacity
                         borderColor: color,
-                        backgroundColor: color + '20',
-                        fill: true,
-                        tension: 0.4,
-                        borderWidth: 3,
-                        pointRadius: 4,
-                        pointBackgroundColor: color
+                        borderWidth: 1,
+                        borderRadius: 4
                     }]
                 },
                 options: {

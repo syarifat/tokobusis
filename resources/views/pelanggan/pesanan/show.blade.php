@@ -155,15 +155,21 @@
                             </div>
                         @endif
 
+                        @php
+                            $dendaAktif = ($pesanan->status_pembayaran == 'lunas' || $pesanan->total_dibayar >= $pesanan->total_harga) 
+                                ? max(0, $pesanan->total_dibayar - $pesanan->total_harga) 
+                                : $pesanan->hitungDenda();
+                            $sisaTagihanTampil = max(0, ($pesanan->total_harga + $dendaAktif) - $pesanan->total_dibayar);
+                        @endphp
                         <div class="space-y-3 mb-6">
                             <div class="flex justify-between text-sm">
                                 <span class="text-gray-500">Total Pokok Tagihan:</span>
                                 <span class="font-bold">Rp {{ number_format($pesanan->total_harga, 0, ',', '.') }}</span>
                             </div>
-                            @if($pesanan->hitungDenda() > 0)
+                            @if($dendaAktif > 0)
                             <div class="flex justify-between text-sm text-red-600">
                                 <span>Denda Keterlambatan:</span>
-                                <span class="font-bold">+ Rp {{ number_format($pesanan->hitungDenda(), 0, ',', '.') }}</span>
+                                <span class="font-bold">+ Rp {{ number_format($dendaAktif, 0, ',', '.') }}</span>
                             </div>
                             @endif
                             <div class="flex justify-between text-sm">
@@ -172,18 +178,19 @@
                             </div>
                             <div class="flex justify-between text-sm border-t pt-2">
                                 <span class="font-bold">Sisa Tagihan:</span>
-                                <span class="font-bold text-red-600" id="sisa-tagihan-val">Rp {{ number_format(($pesanan->total_harga + $pesanan->hitungDenda()) - $pesanan->total_dibayar, 0, ',', '.') }}</span>
+                                <span class="font-bold text-red-600" id="sisa-tagihan-val">Rp {{ number_format($sisaTagihanTampil, 0, ',', '.') }}</span>
                             </div>
                         </div>
 
                         <div class="mb-6 text-center">
                             <p class="text-xs text-gray-500 mb-1">Status Pembayaran</p>
-                            <span class="px-4 py-1 rounded-full text-sm font-black uppercase {{ $pesanan->status_pembayaran == 'lunas' ? 'bg-green-500 text-white' : 'bg-orange-500 text-white' }}">
-                                {{ str_replace('_', ' ', $pesanan->status_pembayaran) }}
+                            @php $isLunas = $pesanan->status_pembayaran == 'lunas' || $sisaTagihanTampil == 0; @endphp
+                            <span class="px-4 py-1 rounded-full text-sm font-black uppercase {{ $isLunas ? 'bg-green-500 text-white' : 'bg-orange-500 text-white' }}">
+                                {{ $isLunas ? 'LUNAS' : str_replace('_', ' ', $pesanan->status_pembayaran) }}
                             </span>
                         </div>
 
-                        @if($pesanan->status_pembayaran != 'lunas')
+                        @if(!$isLunas)
                             
                             @if($pesanan->tipe_pembayaran == 'cash')
                                 <div class="bg-blue-50 border border-blue-200 p-4 rounded-lg text-center">

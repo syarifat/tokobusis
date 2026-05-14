@@ -85,6 +85,6 @@ class Pesanan extends Model
             return 0;
         }
 
-        return $sisa * 0.10 * $monthsOverdue;
+        return round($sisa * 0.10 * $monthsOverdue);
     }
 }

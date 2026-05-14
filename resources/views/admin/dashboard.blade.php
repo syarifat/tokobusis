@@ -86,11 +86,11 @@
 
                 <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
                     <h3 class="font-bold text-gray-800 mb-4 flex items-center">
-                        <div class="w-2 h-6 bg-red-500 rounded-full mr-2"></div>
-                        Grafik Pendapatan Denda
+                        <div class="w-2 h-6 bg-orange-500 rounded-full mr-2"></div>
+                        Grafik Cicilan Berlangsung (Aktif)
                     </h3>
                     <div class="h-64">
-                        <canvas id="penaltyRevenueChart"></canvas>
+                        <canvas id="installmentChart"></canvas>
                     </div>
                 </div>
             </div>
@@ -276,11 +276,13 @@
     @push('scripts')
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
-        const labels = @json($revenueData->pluck('label'));
-        const pureRevenue = @json($revenueData->pluck('pure_revenue'));
-        const penaltyRevenue = @json($revenueData->pluck('penalty_revenue'));
+        const revenueLabels = @json($revenueData->pluck('label'));
+        const pureRevenueData = @json($revenueData->pluck('pure_revenue'));
 
-        const chartConfig = (id, label, data, color) => {
+        const installmentLabels = @json($installmentData->pluck('label'));
+        const installmentCountData = @json($installmentData->pluck('total_count'));
+
+        const chartConfig = (id, label, labels, data, color, isCurrency = true) => {
             return new Chart(document.getElementById(id), {
                 type: 'line',
                 data: {
@@ -308,7 +310,8 @@
                             beginAtZero: true,
                             ticks: {
                                 callback: function(value) {
-                                    return 'Rp ' + value.toLocaleString();
+                                    if (isCurrency) return 'Rp ' + value.toLocaleString();
+                                    return value + ' Pesanan';
                                 }
                             }
                         }
@@ -317,8 +320,8 @@
             });
         };
 
-        chartConfig('pureRevenueChart', 'Pendapatan Murni', pureRevenue, '#2563eb');
-        chartConfig('penaltyRevenueChart', 'Pendapatan Denda', penaltyRevenue, '#ef4444');
+        chartConfig('pureRevenueChart', 'Pendapatan Murni', revenueLabels, pureRevenueData, '#2563eb', true);
+        chartConfig('installmentChart', 'Jumlah Cicilan Aktif', installmentLabels, installmentCountData, '#f97316', false);
     </script>
     @endpush
 </x-app-layout>

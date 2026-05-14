@@ -36,8 +36,18 @@ class DashboardController extends Controller
             ->whereBetween('updated_at', [$startDate, $endDate])
             ->select(
                 DB::raw("DATE_FORMAT(updated_at, '$format') as label"),
-                DB::raw("SUM(total_harga) as pure_revenue"),
-                DB::raw("SUM(CASE WHEN total_dibayar > total_harga THEN total_dibayar - total_harga ELSE 0 END) as penalty_revenue")
+                DB::raw("SUM(total_harga) as pure_revenue")
+            )
+            ->groupBy('label')
+            ->orderBy('label', 'asc')
+            ->get();
+
+        // Grafik Cicilan Berlangsung (Berapa banyak pesanan yang sedang dicicil)
+        $installmentData = Pesanan::where('status_pembayaran', 'cicilan')
+            ->whereBetween('created_at', [$startDate, $endDate])
+            ->select(
+                DB::raw("DATE_FORMAT(created_at, '$format') as label"),
+                DB::raw("COUNT(*) as total_count")
             )
             ->groupBy('label')
             ->orderBy('label', 'asc')
@@ -75,6 +85,7 @@ class DashboardController extends Controller
             'pesananTerbaru',
             'barangStokTipis',
             'revenueData',
+            'installmentData',
             'topBuyers',
             'topEventCustomers',
             'startDate',

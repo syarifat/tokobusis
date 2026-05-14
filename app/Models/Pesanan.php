@@ -110,4 +110,11 @@ class Pesanan extends Model
         }
         return $this->sisa_tagihan <= 0;
     }
+
+    public function syncStatusPembayaran()
+    {
+        $status = $this->is_lunas ? 'lunas' : ($this->total_dibayar > 0 ? 'cicilan' : 'belum_bayar');
+        $this->update(['status_pembayaran' => $status]);
+        return $status;
+    }
 }

@@ -33,16 +33,12 @@ class MidtransWebhookController extends Controller
             $pesanan = $pembayaran->pesanan;
             $newTotalDibayar = $pesanan->total_dibayar + $pembayaran->nominal_bayar;
             
-            // Re-calculate denda to check if it's fully paid
-            $denda = $pesanan->hitungDenda();
-            $statusBayar = ($newTotalDibayar >= ($pesanan->total_harga + $denda)) ? 'lunas' : 'cicilan';
-
             $pesanan->update([
                 'total_dibayar' => $newTotalDibayar,
-                'status_pembayaran' => $statusBayar
             ]);
             
-            $sisaKirim = max(0, ($pesanan->total_harga + $denda) - $newTotalDibayar);
+            $statusBayar = $pesanan->syncStatusPembayaran();
+            $sisaKirim = $pesanan->sisa_tagihan;
 
             // Kirim WA Notifikasi ke Pelanggan
             $wa = new FonnteService();

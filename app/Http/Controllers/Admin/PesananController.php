@@ -105,16 +105,8 @@ class PesananController extends Controller
             'total_dibayar' => $totalDibayarBaru,
         ]);
 
-        // 3. Jika sudah lunas, ubah status pembayarannya
-        if ($totalDibayarBaru >= ($pesanan->total_harga + $denda)) {
-            $pesanan->update([
-                'status_pembayaran' => 'lunas',
-            ]);
-        } elseif ($totalDibayarBaru > 0) {
-            $pesanan->update([
-                'status_pembayaran' => 'cicilan',
-            ]);
-        }
+        // 3. Sinkronisasi status pembayaran di database
+        $pesanan->syncStatusPembayaran();
 
         return back()->with('success', 'Pembayaran tunai sebesar Rp ' . number_format($nominal, 0, ',', '.') . ' berhasil dicatat.');
     }

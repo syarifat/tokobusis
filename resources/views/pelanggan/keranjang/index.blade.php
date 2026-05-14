@@ -82,6 +82,7 @@
                                                         <p class="text-gray-900 whitespace-no-wrap font-semibold">
                                                             {{ $item->barang->nama_barang }}
                                                         </p>
+                                                        <p class="text-xs {{ $item->barang->stok <= 5 ? 'text-red-500 font-bold' : 'text-gray-500' }}">Sisa stok: {{ $item->barang->stok }} {{ $item->barang->satuan }}</p>
                                                     </div>
                                                 </div>
                                             </td>
@@ -91,15 +92,20 @@
                                             </td>
                                             
                                             <td class="px-5 py-5 border-b border-gray-200 text-sm text-center">
-                                                <form action="{{ route('pelanggan.keranjang.update', $item->id) }}" method="POST" class="flex items-center justify-center gap-2">
+                                                <form action="{{ route('pelanggan.keranjang.update', $item->id) }}" method="POST" class="flex flex-col items-center justify-center gap-2">
                                                     @csrf
                                                     @method('PUT')
-                                                    <input type="number" name="qty" value="{{ $item->qty }}" min="1" max="{{ $item->barang->stok }}" class="w-16 border-gray-300 rounded shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-center text-sm p-1">
-                                                    <button type="submit" class="text-blue-600 hover:text-blue-900 bg-blue-50 p-1 rounded" title="Update Jumlah">
-                                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                                                        </svg>
-                                                    </button>
+                                                    <div class="flex items-center gap-2">
+                                                        <input type="number" name="qty" value="{{ $item->qty }}" min="1" max="{{ $item->barang->stok }}" class="w-16 border-gray-300 rounded shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-center text-sm p-1">
+                                                        <button type="submit" class="text-blue-600 hover:text-blue-900 bg-blue-50 p-1 rounded" title="Update Jumlah">
+                                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                                                            </svg>
+                                                        </button>
+                                                    </div>
+                                                    @if($item->qty > $item->barang->stok)
+                                                        <span class="text-[10px] text-red-500 font-bold bg-red-50 px-2 py-0.5 rounded">Melebihi stok! (Max: {{ $item->barang->stok }})</span>
+                                                    @endif
                                                 </form>
                                             </td>
                                             

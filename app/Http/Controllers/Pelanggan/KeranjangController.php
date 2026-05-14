@@ -46,10 +46,18 @@ class KeranjangController extends Controller
                               ->where('barang_id', $request->barang_id)
                               ->first();
 
+        $barang = \App\Models\Barang::findOrFail($request->barang_id);
+        $currentQty = $keranjang ? $keranjang->qty : 0;
+        $newQty = $currentQty + $request->qty;
+
+        if ($newQty > $barang->stok) {
+            return redirect()->back()->with('error', "Gagal menambahkan! Sisa stok {$barang->nama_barang} hanya {$barang->stok} {$barang->satuan}.");
+        }
+
         if ($keranjang) {
             // Jika sudah ada, tambahkan qty-nya
             $keranjang->update([
-                'qty' => $keranjang->qty + $request->qty
+                'qty' => $newQty
             ]);
         } else {
             // Jika belum ada, buat record baru
@@ -69,6 +77,11 @@ class KeranjangController extends Controller
         // Pastikan keranjang ini milik user yang sedang login
         if ($keranjang->user_id !== Auth::id()) {
             abort(403);
+        }
+
+        $barang = $keranjang->barang;
+        if ($request->qty > $barang->stok) {
+            return redirect()->back()->with('error', "Gagal update! Sisa stok {$barang->nama_barang} hanya {$barang->stok} {$barang->satuan}.");
         }
 
         $keranjang->update(['qty' => $request->qty]);
@@ -119,14 +132,25 @@ class KeranjangController extends Controller
             $barangId = $item['id'];
             $qtyInput = $item['qty'];
 
+            $barang = \App\Models\Barang::find($barangId);
+            if (!$barang) continue;
+
             // Cek apakah barang sudah ada di keranjang user
             $keranjang = Keranjang::where('user_id', Auth::id())
                 ->where('barang_id', $barangId)
                 ->first();
 
+            $currentQty = $keranjang ? $keranjang->qty : 0;
+            $newQty = $currentQty + $qtyInput;
+
+            if ($newQty > $barang->stok) {
+                return redirect()->route('pelanggan.keranjang.index')
+                    ->with('error', "Gagal! Sisa stok {$barang->nama_barang} hanya {$barang->stok} {$barang->satuan}. Sebagian barang gagal ditambahkan.");
+            }
+
             if ($keranjang) {
                 // Jika sudah ada, tambahkan qty dari input ke qty yang sudah ada
-                $keranjang->increment('qty', $qtyInput);
+                $keranjang->update(['qty' => $newQty]);
             } else {
                 // Jika belum ada, buat record baru dengan qty sesuai input
                 Keranjang::create([

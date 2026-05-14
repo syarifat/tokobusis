@@ -80,6 +80,7 @@
                             <div class="text-xl font-black text-blue-600 mb-3">Rp {{ number_format($barang->harga, 0, ',', '.') }}</div>
                             
                             <div class="mt-auto">
+                                <p class="text-xs text-gray-500 mb-2">Sisa stok: <span class="font-bold {{ $barang->stok <= 5 ? 'text-red-500' : 'text-gray-800' }}">{{ $barang->stok }} {{ $barang->satuan }}</span></p>
                                 @if($barang->stok > 0)
                                     <div class="flex items-center justify-center bg-gray-100 rounded-xl p-1 border border-gray-200 mb-3">
                                         <button type="button" @click="if(localQty > 1) { localQty--; updateGlobalQty({{ $barang->id }}, localQty); }" class="w-10 h-10 flex items-center justify-center text-blue-600 font-black text-xl hover:bg-white rounded-lg transition">-</button>

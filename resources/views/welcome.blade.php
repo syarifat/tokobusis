@@ -216,21 +216,21 @@
             </div>
 
             <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <div class="col-span-2 row-span-2 rounded-2xl overflow-hidden shadow-md relative group">
+                {{-- Foto 1 (Besar Kiri) --}}
+                <div class="col-span-2 md:row-span-2 rounded-2xl overflow-hidden shadow-md relative group min-h-[250px] md:min-h-[400px]">
                     <img src="{{ asset('img_landing/1.jpg') }}" alt="Galeri 1" class="w-full h-full object-cover transform group-hover:scale-105 transition duration-500">
                     <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition duration-300"></div>
                 </div>
+                {{-- Foto 2 & 3 (Kanan Atas) --}}
                 <div class="rounded-2xl overflow-hidden shadow-md relative group h-48 md:h-auto">
                     <img src="{{ asset('img_landing/2.jpg') }}" alt="Galeri 2" class="w-full h-full object-cover transform group-hover:scale-105 transition duration-500">
                 </div>
                 <div class="rounded-2xl overflow-hidden shadow-md relative group h-48 md:h-auto">
                     <img src="{{ asset('img_landing/3.jpg') }}" alt="Galeri 3" class="w-full h-full object-cover transform group-hover:scale-105 transition duration-500">
                 </div>
-                <div class="rounded-2xl overflow-hidden shadow-md relative group h-48 md:h-auto">
+                {{-- Foto 4 (Kanan Bawah Lebar) --}}
+                <div class="col-span-2 rounded-2xl overflow-hidden shadow-md relative group h-48 md:h-auto">
                     <img src="{{ asset('img_landing/4.jpg') }}" alt="Galeri 4" class="w-full h-full object-cover transform group-hover:scale-105 transition duration-500">
-                </div>
-                <div class="rounded-2xl overflow-hidden shadow-md relative group h-48 md:h-auto">
-                    <img src="{{ asset('img_landing/5.jpg') }}" alt="Galeri 5" class="w-full h-full object-cover transform group-hover:scale-105 transition duration-500">
                 </div>
             </div>
         </div>

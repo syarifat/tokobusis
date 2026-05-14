@@ -24,18 +24,18 @@
                 
                 <div>
                     @if (Route::has('login'))
-                        <div class="flex items-center gap-4">
+                        <div class="flex items-center gap-2 sm:gap-4">
                             @auth
                                 @if(Auth::user()->role === 'admin')
-                                    <a href="{{ route('admin.dashboard') }}" class="font-bold text-indigo-600 hover:text-indigo-800 transition">Dashboard Admin</a>
+                                    <a href="{{ route('admin.dashboard') }}" class="font-bold text-indigo-600 hover:text-indigo-800 transition text-sm sm:text-base">Dashboard</a>
                                 @else
-                                    <a href="{{ route('pelanggan.dashboard') }}" class="font-bold text-indigo-600 hover:text-indigo-800 transition">Mulai Belanja &rarr;</a>
+                                    <a href="{{ route('pelanggan.dashboard') }}" class="font-bold text-indigo-600 hover:text-indigo-800 transition text-sm sm:text-base">Mulai Belanja &rarr;</a>
                                 @endif
                             @else
-                                <a href="{{ route('pelanggan.dashboard') }}" class="font-bold text-indigo-600 hover:text-indigo-800 transition">Lihat Katalog</a>
-                                <a href="{{ route('login') }}" class="font-semibold text-gray-600 hover:text-gray-900 transition">Masuk</a>
+                                <a href="{{ route('pelanggan.dashboard') }}" class="hidden sm:inline-block font-bold text-indigo-600 hover:text-indigo-800 transition">Lihat Katalog</a>
+                                <a href="{{ route('login') }}" class="font-semibold text-gray-600 hover:text-gray-900 transition text-sm sm:text-base">Masuk</a>
                                 @if (Route::has('register'))
-                                    <a href="{{ route('register') }}" class="font-bold bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition shadow-md">Daftar Sekarang</a>
+                                    <a href="{{ route('register') }}" class="font-bold bg-indigo-600 text-white px-3 py-1.5 sm:px-4 sm:py-2 rounded-lg hover:bg-indigo-700 transition shadow-md text-sm sm:text-base">Daftar</a>
                                 @endif
                             @endauth
                         </div>
@@ -60,8 +60,8 @@
                         <p class="mt-3 text-base text-gray-500 sm:mt-5 sm:text-lg sm:max-w-xl sm:mx-auto md:mt-5 md:text-xl lg:mx-0">
                             Solusi lengkap untuk kebutuhan dapur harian hingga acara besar (Pitonan, Nikahan, dll). Nikmati kemudahan pesan antar, bayar di tempat, hingga sistem Bon/Cicilan khusus event.
                         </p>
-                        <div class="mt-5 sm:mt-8 sm:flex sm:justify-center lg:justify-start gap-3">
-                            <div class="rounded-md shadow">
+                        <div class="mt-5 flex flex-col sm:flex-row sm:justify-center lg:justify-start gap-3">
+                            <div class="rounded-md shadow w-full sm:w-auto">
                                 @auth
                                     <a href="{{ Auth::user()->role === 'admin' ? route('admin.dashboard') : route('pelanggan.dashboard') }}" class="w-full flex items-center justify-center px-8 py-3 border border-transparent text-base font-bold rounded-lg text-white bg-indigo-600 hover:bg-indigo-700 md:py-4 md:text-lg transition">
                                         Masuk ke Toko
@@ -72,7 +72,7 @@
                                     </a>
                                 @endauth
                             </div>
-                            <div class="mt-3 sm:mt-0">
+                            <div class="w-full sm:w-auto">
                                 @guest
                                 <a href="{{ route('register') }}" class="w-full flex items-center justify-center px-8 py-3 border border-gray-300 text-base font-bold rounded-lg text-gray-700 bg-white hover:bg-gray-50 md:py-4 md:text-lg transition">
                                     Daftar Sekarang
@@ -261,7 +261,7 @@
                         </a>
                     </div>
                 </div>
-                <div class="w-full md:w-1/2 h-64 md:h-auto min-h-[400px] relative rounded-r-3xl overflow-hidden">
+                <div class="w-full md:w-1/2 min-h-[300px] md:min-h-[400px] relative rounded-b-3xl md:rounded-r-3xl md:rounded-bl-none overflow-hidden">
                     {{-- Iframe Google Maps --}}
                     <iframe 
                         src="https://maps.google.com/maps?q=Toko%20Pawon%20Bu%20Sis,%20Dusun%20cari,%20Banjarsari,%20Kec.%20Ngantru,%20Kabupaten%20Tulungagung,%20Jawa%20Timur%2066252&t=&z=15&ie=UTF8&iwloc=&output=embed" 
@@ -281,17 +281,17 @@
                 <span class="block">Siap untuk mulai belanja?</span>
                 <span class="block text-indigo-200">Daftar sekarang dan nikmati kemudahannya.</span>
             </h2>
-            <div class="mt-8 flex lg:mt-0 lg:flex-shrink-0 gap-3">
-                <div class="inline-flex rounded-md shadow gap-3">
+            <div class="mt-8 flex flex-col sm:flex-row lg:mt-0 lg:flex-shrink-0 gap-3 w-full sm:w-auto">
+                <div class="flex flex-col sm:flex-row rounded-md shadow gap-3 w-full sm:w-auto">
                     @auth
-                        <a href="{{ Auth::user()->role === 'admin' ? route('admin.dashboard') : route('pelanggan.dashboard') }}" class="inline-flex items-center justify-center px-5 py-3 border border-transparent text-base font-bold rounded-md text-indigo-600 bg-white hover:bg-indigo-50 transition">
+                        <a href="{{ Auth::user()->role === 'admin' ? route('admin.dashboard') : route('pelanggan.dashboard') }}" class="w-full sm:w-auto inline-flex items-center justify-center px-5 py-3 border border-transparent text-base font-bold rounded-md text-indigo-600 bg-white hover:bg-indigo-50 transition">
                             Masuk Dashboard
                         </a>
                     @else
-                        <a href="{{ route('pelanggan.dashboard') }}" class="inline-flex items-center justify-center px-5 py-3 border border-transparent text-base font-bold rounded-md text-indigo-600 bg-white hover:bg-indigo-50 transition">
+                        <a href="{{ route('pelanggan.dashboard') }}" class="w-full sm:w-auto inline-flex items-center justify-center px-5 py-3 border border-transparent text-base font-bold rounded-md text-indigo-600 bg-white hover:bg-indigo-50 transition">
                             Lihat Katalog
                         </a>
-                        <a href="{{ route('register') }}" class="inline-flex items-center justify-center px-5 py-3 border border-transparent text-base font-bold rounded-md text-white bg-indigo-500 hover:bg-indigo-400 transition">
+                        <a href="{{ route('register') }}" class="w-full sm:w-auto inline-flex items-center justify-center px-5 py-3 border border-transparent text-base font-bold rounded-md text-white bg-indigo-500 hover:bg-indigo-400 transition">
                             Buat Akun Gratis
                         </a>
                     @endauth

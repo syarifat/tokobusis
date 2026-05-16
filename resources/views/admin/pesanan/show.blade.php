@@ -93,26 +93,63 @@
                             $cicilan_sisa = [];
                             $cicilan_dibayar = 0;
                             $nominal_per_cicilan = 0;
+                            $jadwal_cicilan = [];
                             if ($pesanan->jenis_pesanan == 'event' && $pesanan->jumlah_cicilan > 1) {
                                 $nominal_per_cicilan = round($pesanan->total_harga / $pesanan->jumlah_cicilan);
                                 $akumulasi = 0;
+                                
+                                $start = \Carbon\Carbon::parse($pesanan->tanggal_acara)->startOfDay();
+                                $end = \Carbon\Carbon::parse($pesanan->tenggat_pembayaran)->startOfDay();
+                                $totalDays = max(1, $start->diffInDays($end));
+                                $intervalDays = $totalDays / max(1, $pesanan->jumlah_cicilan);
+
                                 for($i = 1; $i <= $pesanan->jumlah_cicilan; $i++) {
                                     $tagihan = ($i == $pesanan->jumlah_cicilan) ? ($pesanan->total_harga - $akumulasi) : $nominal_per_cicilan;
                                     $akumulasi += $tagihan;
+                                    $dueDate = $start->copy()->addDays(round($intervalDays * $i));
+                                    
+                                    $statusBayar = 'Belum';
                                     if ($pesanan->total_dibayar >= ($akumulasi - 10)) {
                                         $cicilan_dibayar++;
+                                        $statusBayar = 'Lunas';
                                     } else {
                                         $cicilan_sisa[] = ['ke' => $i, 'nominal' => $tagihan];
                                     }
+                                    
+                                    $jadwal_cicilan[] = [
+                                        'ke' => $i, 
+                                        'nominal' => $tagihan, 
+                                        'due_date' => $dueDate,
+                                        'status' => $statusBayar
+                                    ];
                                 }
                             }
                         @endphp
 
                         @if($pesanan->jenis_pesanan == 'event' && $pesanan->jumlah_cicilan > 1)
                             <div class="mb-4 bg-purple-50 p-3 rounded-lg border border-purple-100 text-xs">
-                                <p class="font-bold text-purple-900 mb-1">Progres Cicilan:</p>
-                                <p class="text-purple-800">Sudah dibayar: <strong>{{ $cicilan_dibayar }} dari {{ $pesanan->jumlah_cicilan }} cicilan</strong>.</p>
-                                <p class="text-purple-700 mt-1">Nominal per cicilan: Rp {{ number_format($nominal_per_cicilan, 0, ',', '.') }}</p>
+                                <p class="font-bold text-purple-900 mb-2 border-b border-purple-200 pb-1">Jadwal & Progres Cicilan:</p>
+                                <div class="space-y-1 mb-2">
+                                    @foreach($jadwal_cicilan as $jadwal)
+                                        <div class="flex justify-between items-center {{ $jadwal['status'] == 'Lunas' ? 'text-green-700 opacity-70' : ($jadwal['due_date']->isPast() && !$pesanan->is_lunas ? 'text-red-600 font-bold' : 'text-gray-700') }}">
+                                            <span>Cicilan ke-{{ $jadwal['ke'] }} ({{ $jadwal['due_date']->format('d M Y') }})</span>
+                                            <span>
+                                                Rp {{ number_format($jadwal['nominal'], 0, ',', '.') }}
+                                                @if($jadwal['status'] == 'Lunas')
+                                                    <span class="ml-1 text-[10px] bg-green-100 px-1 py-0.5 rounded text-green-800">✔</span>
+                                                @elseif($jadwal['due_date']->isPast() && !$pesanan->is_lunas)
+                                                    <span class="ml-1 text-[10px] bg-red-100 px-1 py-0.5 rounded text-red-800">TELAT</span>
+                                                @endif
+                                            </span>
+                                        </div>
+                                    @endforeach
+                                </div>
+                                <p class="text-purple-800 pt-1 border-t border-purple-200 flex justify-between">
+                                    <span>Total Lunas: <strong>{{ $cicilan_dibayar }} dari {{ $pesanan->jumlah_cicilan }}</strong></span>
+                                    @if($pesanan->hitungDenda() > 0)
+                                        <span class="text-red-600 font-bold text-[10px] uppercase">Denda Aktif</span>
+                                    @endif
+                                </p>
                             </div>
                         @endif
 

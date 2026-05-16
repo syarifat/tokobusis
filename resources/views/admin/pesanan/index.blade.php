@@ -107,9 +107,25 @@
                                 </td>
 
                                 <td class="px-5 py-5 border-b border-gray-200 text-sm">
-                                    <p class="font-mono text-indigo-600 font-bold">{{ $p->kode_pesanan }}</p>
-                                    <p class="text-xs font-semibold text-gray-600">Total: Rp {{ number_format($p->total_harga, 0, ',', '.') }}</p>
-                                    <p class="text-xs italic bg-gray-100 px-1 inline-block mt-1 rounded">Tgl Antar: {{ \Carbon\Carbon::parse($p->tanggal_pengantaran)->format('d/m/Y') }}</p>
+                                    <p class="font-mono text-indigo-600 font-bold mb-1">{{ $p->kode_pesanan }}</p>
+                                    @php $dendaTampil = max($p->hitungDenda(), $p->total_dibayar - $p->total_harga); @endphp
+                                    <div class="text-[10px] space-y-0.5">
+                                        <div class="flex justify-between w-36">
+                                            <span class="text-gray-500">Total Belanja</span>
+                                            <span class="font-semibold text-gray-700">Rp {{ number_format($p->total_harga, 0, ',', '.') }}</span>
+                                        </div>
+                                        @if($dendaTampil > 0)
+                                        <div class="flex justify-between w-36 text-red-600">
+                                            <span>Denda Cicilan</span>
+                                            <span class="font-bold">+ Rp {{ number_format($dendaTampil, 0, ',', '.') }}</span>
+                                        </div>
+                                        @endif
+                                        <div class="flex justify-between w-36 border-t border-dashed border-gray-300 pt-0.5 mt-0.5">
+                                            <span class="font-bold text-gray-600">Total Akhir</span>
+                                            <span class="font-black text-indigo-700">Rp {{ number_format($p->total_harga + $dendaTampil, 0, ',', '.') }}</span>
+                                        </div>
+                                    </div>
+                                    <p class="text-[9px] italic text-gray-400 mt-2">Tgl Antar: {{ \Carbon\Carbon::parse($p->tanggal_pengantaran)->format('d/m/Y') }}</p>
                                 </td>
 
                                 <td class="px-5 py-5 border-b border-gray-200 text-sm text-center">

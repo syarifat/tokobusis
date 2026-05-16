@@ -95,8 +95,24 @@
                                         </div>
                                     </td>
 
-                                    <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm font-bold">
-                                        Rp {{ number_format($p->total_harga, 0, ',', '.') }}
+                                    <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm">
+                                        @php $dendaTampil = max($p->hitungDenda(), $p->total_dibayar - $p->total_harga); @endphp
+                                        <div class="text-[10px] space-y-0.5">
+                                            <div class="flex justify-between w-36">
+                                                <span class="text-gray-500">Total Belanja</span>
+                                                <span class="font-semibold text-gray-700">Rp {{ number_format($p->total_harga, 0, ',', '.') }}</span>
+                                            </div>
+                                            @if($dendaTampil > 0)
+                                            <div class="flex justify-between w-36 text-red-600">
+                                                <span>Denda Cicilan</span>
+                                                <span class="font-bold">+ Rp {{ number_format($dendaTampil, 0, ',', '.') }}</span>
+                                            </div>
+                                            @endif
+                                            <div class="flex justify-between w-36 border-t border-dashed border-gray-300 pt-0.5 mt-0.5">
+                                                <span class="font-bold text-gray-600">Total Akhir</span>
+                                                <span class="font-black text-indigo-700">Rp {{ number_format($p->total_harga + $dendaTampil, 0, ',', '.') }}</span>
+                                            </div>
+                                        </div>
                                     </td>
                                     
                                     <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm text-center">

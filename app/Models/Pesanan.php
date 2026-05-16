@@ -53,39 +53,95 @@ class Pesanan extends Model
         return $this->hasMany(Pembayaran::class);
     }
 
-    // Hitung berapa bulan keterlambatan
-    public function getMonthsOverdue()
-    {
-        if ($this->status_pembayaran === 'lunas' || $this->jenis_pesanan !== 'event' || !$this->tenggat_pembayaran) {
-            return 0;
-        }
-
-        $tenggat = \Carbon\Carbon::parse($this->tenggat_pembayaran)->startOfDay();
-        $sekarang = now()->startOfDay();
-
-        $daysOverdue = $tenggat->diffInDays($sekarang, false);
-
-        if ($daysOverdue <= 0) {
-            return 0;
-        }
-
-        return ceil($daysOverdue / 30);
-    }
-
-    // Hitung nominal denda (10% per bulan dari sisa tagihan)
+    // Hitung nominal denda (2% per cicilan yang nunggak/terlewat)
     public function hitungDenda()
     {
-        $monthsOverdue = $this->getMonthsOverdue();
-        if ($monthsOverdue <= 0) {
+        if ($this->status_pembayaran === 'lunas' || $this->jenis_pesanan !== 'event' || !$this->tenggat_pembayaran || !$this->jumlah_cicilan) {
             return 0;
         }
 
-        $sisa = $this->total_harga - $this->total_dibayar;
-        if ($sisa <= 0) {
+        $sekarang = now()->startOfDay();
+        $start = \Carbon\Carbon::parse($this->tanggal_acara)->startOfDay();
+        $end = \Carbon\Carbon::parse($this->tenggat_pembayaran)->startOfDay();
+
+        // Jika belum masuk masa cicilan (sebelum acara), tidak ada denda
+        if ($sekarang->lte($start)) {
             return 0;
         }
 
-        return round($sisa * 0.10 * $monthsOverdue);
+        $totalDays = max(1, $start->diffInDays($end));
+        $daysPassed = $start->diffInDays($sekarang);
+        
+        // Interval hari per cicilan
+        $intervalDays = $totalDays / max(1, $this->jumlah_cicilan);
+
+        // Berapa cicilan yang SUDAH JATUH TEMPO sampai hari ini
+        $installmentsDue = floor($daysPassed / $intervalDays);
+        if ($installmentsDue > $this->jumlah_cicilan) {
+            $installmentsDue = $this->jumlah_cicilan;
+        }
+
+        if ($installmentsDue <= 0) {
+            return 0;
+        }
+
+        // Nominal pokok per cicilan
+        $nominalPerCicilan = $this->total_harga / $this->jumlah_cicilan;
+        
+        // Ekspektasi total uang yang harusnya sudah masuk hari ini
+        $expectedPayment = $installmentsDue * $nominalPerCicilan;
+        
+        // Kurangi dengan yang sudah dibayar untuk melihat apakah ada tunggakan
+        $shortfall = $expectedPayment - $this->total_dibayar;
+
+        if ($shortfall > 0) {
+            // Hitung berapa jumlah cicilan yang nunggak
+            $missedInstallments = ceil($shortfall / $nominalPerCicilan);
+            
+            // Denda 2% dari nominal cicilan untuk setiap cicilan yang nunggak
+            return round($missedInstallments * ($nominalPerCicilan * 0.02));
+        }
+
+        return 0;
+    }
+
+    public function getMissedInstallments()
+    {
+        if ($this->status_pembayaran === 'lunas' || $this->jenis_pesanan !== 'event' || !$this->tenggat_pembayaran || !$this->jumlah_cicilan) {
+            return 0;
+        }
+
+        $sekarang = now()->startOfDay();
+        $start = \Carbon\Carbon::parse($this->tanggal_acara)->startOfDay();
+        $end = \Carbon\Carbon::parse($this->tenggat_pembayaran)->startOfDay();
+
+        if ($sekarang->lte($start)) {
+            return 0;
+        }
+
+        $totalDays = max(1, $start->diffInDays($end));
+        $daysPassed = $start->diffInDays($sekarang);
+        
+        $intervalDays = $totalDays / max(1, $this->jumlah_cicilan);
+
+        $installmentsDue = floor($daysPassed / $intervalDays);
+        if ($installmentsDue > $this->jumlah_cicilan) {
+            $installmentsDue = $this->jumlah_cicilan;
+        }
+
+        if ($installmentsDue <= 0) {
+            return 0;
+        }
+
+        $nominalPerCicilan = $this->total_harga / $this->jumlah_cicilan;
+        $expectedPayment = $installmentsDue * $nominalPerCicilan;
+        $shortfall = $expectedPayment - $this->total_dibayar;
+
+        if ($shortfall > 0) {
+            return ceil($shortfall / $nominalPerCicilan);
+        }
+
+        return 0;
     }
 
     public function getSisaTagihanAttribute()

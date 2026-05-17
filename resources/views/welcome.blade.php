@@ -216,24 +216,33 @@
             </div>
 
             <div class="columns-1 sm:columns-2 md:columns-3 gap-4 space-y-4">
+                {{-- Col 1 Flow --}}
                 <div class="rounded-2xl overflow-hidden shadow-md group relative break-inside-avoid">
                     <img src="{{ asset('img_landing/1.jpeg') }}" alt="Galeri 1" class="w-full h-auto object-cover transform group-hover:scale-105 transition duration-500">
                     <div class="absolute inset-0 bg-black/10 opacity-0 group-hover:opacity-100 transition duration-300"></div>
                 </div>
-                <div class="rounded-2xl overflow-hidden shadow-md group relative break-inside-avoid">
-                    <img src="{{ asset('img_landing/2.png') }}" alt="Galeri 2" class="w-full h-auto object-cover transform group-hover:scale-105 transition duration-500">
-                    <div class="absolute inset-0 bg-black/10 opacity-0 group-hover:opacity-100 transition duration-300"></div>
-                </div>
-                <div class="rounded-2xl overflow-hidden shadow-md group relative break-inside-avoid">
-                    <img src="{{ asset('img_landing/3.png') }}" alt="Galeri 3" class="w-full h-auto object-cover transform group-hover:scale-105 transition duration-500">
-                    <div class="absolute inset-0 bg-black/10 opacity-0 group-hover:opacity-100 transition duration-300"></div>
-                </div>
+                
+                {{-- Col 1 or 2 Flow (Short) --}}
                 <div class="rounded-2xl overflow-hidden shadow-md group relative break-inside-avoid">
                     <img src="{{ asset('img_landing/4.png') }}" alt="Galeri 4" class="w-full h-auto object-cover transform group-hover:scale-105 transition duration-500">
                     <div class="absolute inset-0 bg-black/10 opacity-0 group-hover:opacity-100 transition duration-300"></div>
                 </div>
+                
+                {{-- Col 2 Flow --}}
+                <div class="rounded-2xl overflow-hidden shadow-md group relative break-inside-avoid">
+                    <img src="{{ asset('img_landing/2.png') }}" alt="Galeri 2" class="w-full h-auto object-cover transform group-hover:scale-105 transition duration-500">
+                    <div class="absolute inset-0 bg-black/10 opacity-0 group-hover:opacity-100 transition duration-300"></div>
+                </div>
+
+                {{-- Col 2 or 3 Flow (Short) --}}
                 <div class="rounded-2xl overflow-hidden shadow-md group relative break-inside-avoid">
                     <img src="{{ asset('img_landing/5.png') }}" alt="Galeri 5" class="w-full h-auto object-cover transform group-hover:scale-105 transition duration-500">
+                    <div class="absolute inset-0 bg-black/10 opacity-0 group-hover:opacity-100 transition duration-300"></div>
+                </div>
+
+                {{-- Col 3 Flow --}}
+                <div class="rounded-2xl overflow-hidden shadow-md group relative break-inside-avoid">
+                    <img src="{{ asset('img_landing/3.png') }}" alt="Galeri 3" class="w-full h-auto object-cover transform group-hover:scale-105 transition duration-500">
                     <div class="absolute inset-0 bg-black/10 opacity-0 group-hover:opacity-100 transition duration-300"></div>
                 </div>
             </div>

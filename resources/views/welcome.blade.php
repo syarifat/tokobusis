@@ -245,6 +245,12 @@
                     <img src="{{ asset('img_landing/3.png') }}" alt="Galeri 3" class="w-full h-auto object-cover transform group-hover:scale-105 transition duration-500">
                     <div class="absolute inset-0 bg-black/10 opacity-0 group-hover:opacity-100 transition duration-300"></div>
                 </div>
+
+                {{-- Col 3 Flow (Short/Complete grid) --}}
+                <div class="rounded-2xl overflow-hidden shadow-md group relative break-inside-avoid">
+                    <img src="{{ asset('img_landing/6.png') }}" alt="Galeri 6" class="w-full h-auto object-cover transform group-hover:scale-105 transition duration-500">
+                    <div class="absolute inset-0 bg-black/10 opacity-0 group-hover:opacity-100 transition duration-300"></div>
+                </div>
             </div>
         </div>
     </div>

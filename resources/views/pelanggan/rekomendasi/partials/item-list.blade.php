@@ -42,6 +42,14 @@
             </div>
         @endforeach
     </div>
+
+    @php
+        $totalHargaKeseluruhan = collect($items)->sum('subtotal');
+    @endphp
+    <div class="mt-6 bg-green-50 border-2 border-green-500 rounded-2xl p-6 text-center shadow-sm">
+        <h3 class="text-green-800 font-bold text-lg mb-1">Total Biaya Rekomendasi</h3>
+        <p class="text-green-600 text-3xl font-black">Rp {{ number_format($totalHargaKeseluruhan, 0, ',', '.') }}</p>
+    </div>
 @else
     <p class="text-sm text-gray-500">Tidak ada barang yang dapat direkomendasikan.</p>
 @endif

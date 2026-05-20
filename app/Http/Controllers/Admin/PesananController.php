@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Pesanan;
+use App\Services\FonnteService;
 use Illuminate\Http\Request;
 
 class PesananController extends Controller
@@ -106,7 +107,30 @@ class PesananController extends Controller
         ]);
 
         // 3. Sinkronisasi status pembayaran di database
-        $pesanan->syncStatusPembayaran();
+        $statusBayar = $pesanan->syncStatusPembayaran();
+
+        // 4. Kirim WA Notifikasi ke Pelanggan
+        try {
+            $wa = new FonnteService();
+            $pesanUser = "✅ *PEMBAYARAN DITERIMA*\n\n" .
+                        "Halo {$pesanan->user->name}, pembayaran (Tunai) untuk pesanan *{$pesanan->kode_pesanan}* sebesar Rp " . number_format($nominal, 0, ',', '.') . " telah kami terima.\n";
+
+            if ($pesanan->jenis_pesanan == 'event') {
+                $nom_cicil = $pesanan->total_harga / max(1, $pesanan->jumlah_cicilan);
+                $x_paid = floor($pesanan->total_dibayar / max(1, $nom_cicil));
+                $pesanUser .= "\n*INFO CICILAN*\n" .
+                              "Progres: {$x_paid} dari {$pesanan->jumlah_cicilan} cicilan lunas\n";
+            }
+
+            $sisaTagihanUpdate = ($pesanan->total_harga + $denda) - $pesanan->total_dibayar;
+            $pesanUser .= "\nSisa Tagihan: Rp " . number_format($sisaTagihanUpdate, 0, ',', '.') . "\n" .
+                        "Status: " . strtoupper($statusBayar) . "\n\n" .
+                        "Terima kasih telah berbelanja di Toko Bu Sis!";
+
+            $wa->sendMessage($pesanan->user->no_hp, $pesanUser);
+        } catch (\Exception $e) {
+            \Log::error('Gagal kirim WA Pelanggan (Tunai): ' . $e->getMessage()); 
+        }
 
         return back()->with('success', 'Pembayaran tunai sebesar Rp ' . number_format($nominal, 0, ',', '.') . ' berhasil dicatat.');
     }

@@ -43,8 +43,16 @@ class MidtransWebhookController extends Controller
             // Kirim WA Notifikasi ke Pelanggan
             $wa = new FonnteService();
             $pesanUser = "✅ *PEMBAYARAN DITERIMA*\n\n" .
-                        "Halo {$pesanan->user->name}, pembayaran untuk pesanan *{$pesanan->kode_pesanan}* sebesar Rp " . number_format($pembayaran->nominal_bayar, 0, ',', '.') . " telah kami terima.\n\n" .
-                        "Sisa Tagihan: Rp " . number_format($sisaKirim, 0, ',', '.') . "\n" .
+                        "Halo {$pesanan->user->name}, pembayaran untuk pesanan *{$pesanan->kode_pesanan}* sebesar Rp " . number_format($pembayaran->nominal_bayar, 0, ',', '.') . " telah kami terima.\n";
+
+            if ($pesanan->jenis_pesanan == 'event') {
+                $nom_cicil = $pesanan->total_harga / max(1, $pesanan->jumlah_cicilan);
+                $x_paid = floor($pesanan->total_dibayar / max(1, $nom_cicil));
+                $pesanUser .= "\n*INFO CICILAN*\n" .
+                              "Progres: {$x_paid} dari {$pesanan->jumlah_cicilan} cicilan lunas\n";
+            }
+
+            $pesanUser .= "\nSisa Tagihan: Rp " . number_format($sisaKirim, 0, ',', '.') . "\n" .
                         "Status: " . strtoupper($statusBayar) . "\n\n" .
                         "Terima kasih telah berbelanja di Toko Bu Sis!";
 

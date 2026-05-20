@@ -182,8 +182,18 @@ class CheckoutController extends Controller
                             "Pembayaran: {$pembayaran}\n" .
                             "Subtotal: Rp " . number_format($subtotal, 0, ',', '.') . "\n" .
                             "Ongkir: Rp " . number_format($ongkir, 0, ',', '.') . "\n" .
-                            "Total Tagihan: Rp " . number_format($pesanan->total_harga, 0, ',', '.') . "\n\n" .
-                            "Silakan cek dashboard admin untuk proses lebih lanjut.";
+                            "Total Tagihan: Rp " . number_format($pesanan->total_harga, 0, ',', '.') . "\n";
+
+                if ($pesanan->jenis_pesanan == 'event') {
+                    $pesanAdmin .= "\n*INFO CICILAN / BON*\n" .
+                                   "Acara: {$pesanan->nama_event}\n" .
+                                   "Tanggal Acara: " . \Carbon\Carbon::parse($pesanan->tanggal_acara)->format('d M Y') . "\n" .
+                                   "Tenggat Akhir: " . \Carbon\Carbon::parse($pesanan->tenggat_pembayaran)->format('d M Y') . "\n" .
+                                   "Durasi Cicilan: {$pesanan->jumlah_cicilan}x\n" .
+                                   "Nominal per Cicilan: Rp " . number_format(round($pesanan->total_harga / max(1, $pesanan->jumlah_cicilan)), 0, ',', '.') . "\n";
+                }
+
+                $pesanAdmin .= "\nSilakan cek dashboard admin untuk proses lebih lanjut.";
                             
                 $wa->sendMessage($nomorAdmin, $pesanAdmin);
             }

@@ -67,6 +67,11 @@
                             @if($barang->gambar)
                                 <img src="{{ asset('storage/' . $barang->gambar) }}" class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
                             @endif
+                            @if($barang->stok <= 5 && $barang->stok > 0)
+                                <div class="absolute top-0 left-0 bg-red-600 text-white text-[10px] font-bold px-2 py-1 rounded-br-lg shadow-md">
+                                    STOK MENIPIS
+                                </div>
+                            @endif
                             <div class="absolute top-3 right-3">
                                 <div class="w-6 h-6 rounded-full border-2 flex items-center justify-center transition-colors"
                                      :class="isSelected({{ $barang->id }}) ? 'bg-indigo-500 border-indigo-500' : 'bg-white/50 border-gray-300'">

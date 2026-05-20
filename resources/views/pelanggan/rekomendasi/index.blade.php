@@ -18,9 +18,19 @@
                     <textarea name="bahan" id="bahan" rows="4" class="w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-xl shadow-sm placeholder-gray-400" placeholder="Contoh:&#10;Beras&#10;Minyak Goreng&#10;Gula Pasir" required>{{ old('bahan', $inputBahan ?? '') }}</textarea>
                 </div>
 
-                <div>
+                <div x-data="{
+                    rawBudget: '{{ old('budget', $budget ?? '') }}',
+                    get formattedBudget() {
+                        if (!this.rawBudget) return '';
+                        return parseInt(this.rawBudget.toString().replace(/\D/g, '') || 0).toLocaleString('id-ID');
+                    },
+                    set formattedBudget(value) {
+                        this.rawBudget = value.replace(/\D/g, '');
+                    }
+                }">
                     <label for="budget" class="block text-sm font-bold text-gray-700 mb-2">Budget Maksimal (Rp)</label>
-                    <input type="number" name="budget" id="budget" min="1000" class="w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-xl shadow-sm" placeholder="Contoh: 500000" value="{{ old('budget', $budget ?? '') }}" required>
+                    <input type="text" x-model="formattedBudget" class="w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-xl shadow-sm" placeholder="Contoh: 500.000" required>
+                    <input type="hidden" name="budget" id="budget" x-model="rawBudget">
                 </div>
 
                 <div>

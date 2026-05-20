@@ -146,7 +146,7 @@
                 {{-- Sering Beli --}}
                 <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
                     <div class="px-6 py-5 border-b border-gray-100 bg-gray-50/50">
-                        <h3 class="font-bold text-gray-800">Pelanggan Paling Aktif (Belanja)</h3>
+                        <h3 class="font-bold text-gray-800">Top Customers (Belanja)</h3>
                     </div>
                     <div class="p-0">
                         <table class="min-w-full divide-y divide-gray-200">
